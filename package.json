@@ -1,0 +1,13 @@
+{
+  "name": "creator-recruitment-pdf",
+  "version": "1.0.0",
+  "description": "Generate PDF for creator recruitment",
+  "main": "generate_pdf.js",
+  "scripts": {
+    "generate": "node generate_pdf.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^21.0.0",
+    "pdf-lib": "^1.17.1"
+  }
+}

@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>iFanzy 創作者 - 您的AI分身在您睡覺時工作</title>
+<style>
+:root {
+  --bg:#0a0a0a;
+  --panel:#151515;
+  --yellow:#ffc61a;
+  --yellow-glow:#ffdb4d;
+  --white:#ffffff;
+  --gray:#b4b4b4;
+  --muted:#767676;
+  --line:rgba(255,255,255,.11);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-snap-type:y mandatory; scroll-behavior:smooth; }
+body {
+  background:var(--bg); color:var(--white);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+
+/* Enhanced background with texture */
+.slide {
+  position:relative; width:100vw; height:100vh; min-height:100vh;
+  padding:0; scroll-snap-align:start; overflow:hidden;
+  background:
+    radial-gradient(circle at 75% 20%, rgba(255,198,26,.15), transparent 35%),
+    radial-gradient(circle at 25% 80%, rgba(255,198,26,.08), transparent 40%),
+    var(--bg);
+}
+.slide:before {
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:1;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:
+    radial-gradient(ellipse 90% 60% at 50% 20%, rgba(0,0,0,.8), transparent 85%),
+    linear-gradient(to bottom, rgba(0,0,0,.6), transparent 90%);
+  mask-composite:intersect;
+}
+.slide:after {
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,198,26,.06), transparent 45%);
+  opacity:.6;
+}
+
+/* Brand mark */
+.wordmark {
+  position:fixed; left:clamp(32px,5vw,80px); top:clamp(32px,4vh,56px); z-index:100;
+  font-size:clamp(22px,2.2vw,32px); font-weight:900;
+  letter-spacing:-.04em; color:var(--yellow);
+  text-shadow:0 0 40px rgba(255,198,26,.4);
+}
+
+/* Language switcher */
+.lang-switcher {
+  position:fixed; right:clamp(32px,5vw,80px); top:clamp(32px,4vh,56px); z-index:100;
+  display:flex; gap:12px; align-items:center;
+}
+.lang-btn {
+  padding:10px 18px;
+  background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:8px;
+  color:var(--gray);
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .3s;
+  text-decoration:none;
+  backdrop-filter:blur(12px);
+}
+.lang-btn:hover {
+  background:linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+  border-color:rgba(255,198,26,.3);
+  color:var(--white);
+  transform:translateY(-2px);
+}
+.lang-btn.active {
+  background:linear-gradient(135deg, rgba(255,198,26,.15), rgba(255,198,26,.08));
+  border-color:rgba(255,198,26,.4);
+  color:var(--yellow);
+  box-shadow:0 0 20px rgba(255,198,26,.2);
+}
+
+/* Content container with proper centering */
+.content {
+  position:relative; z-index:2;
+  min-height:100vh;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:clamp(80px,12vh,140px) clamp(32px,6vw,100px) clamp(80px,10vh,120px);
+  max-width:1600px; margin:0 auto;
+}
+.content.center { text-align:center; align-items:center; }
+
+/* Typography with better spacing */
+.kicker {
+  color:var(--yellow); font-size:clamp(11px,1.1vw,13px);
+  font-weight:800; letter-spacing:.18em; text-transform:uppercase;
+  margin-bottom:clamp(20px,2.5vh,32px);
+  opacity:.9;
+  position:relative; display:inline-block;
+  text-shadow:0 0 20px rgba(255,198,26,.3);
+}
+h1 {
+  margin:0; font-size:clamp(42px,5.2vw,68px);
+  line-height:1.15; letter-spacing:-.025em; font-weight:800;
+  text-shadow:0 2px 40px rgba(0,0,0,.5);
+}
+h2 {
+  margin:0; font-size:clamp(36px,4.2vw,56px);
+  line-height:1.2; letter-spacing:-.02em; font-weight:750;
+  text-shadow:0 2px 30px rgba(0,0,0,.4);
+}
+h3 {
+  margin:0; font-size:clamp(20px,2vw,28px);
+  line-height:1.35; letter-spacing:-.02em; font-weight:700;
+}
+p {
+  margin:0; color:var(--gray);
+  font-size:clamp(18px,1.8vw,22px);
+  line-height:1.55; letter-spacing:-.01em;
+}
+.small { color:var(--muted); font-size:clamp(14px,1.4vw,17px); line-height:1.6; }
+.yellow { color:var(--yellow); }
+.accent {
+  width:clamp(60px,8vw,80px); height:4px; border-radius:999px;
+  background:linear-gradient(90deg, var(--yellow), var(--yellow-glow));
+  margin:clamp(28px,3.5vh,40px) auto 0;
+  box-shadow:0 0 20px rgba(255,198,26,.5);
+}
+.tagline {
+  font-size:clamp(16px,1.7vw,20px); color:var(--gray);
+  margin-top:clamp(24px,3vh,36px); max-width:clamp(600px,60vw,920px);
+  line-height:1.6; letter-spacing:-.015em; font-weight:400;
+}
+
+/* Premium button */
+.btn {
+  display:inline-flex; align-items:center; gap:12px;
+  padding:clamp(16px,2vh,22px) clamp(32px,4vw,48px);
+  border-radius:999px;
+  background:linear-gradient(135deg, var(--yellow) 0%, var(--yellow-glow) 100%);
+  color:#0a0a0a;
+  font-size:clamp(15px,1.6vw,18px); font-weight:800;
+  letter-spacing:-.015em;
+  border:0; cursor:pointer;
+  text-decoration:none;
+  position:relative; overflow:hidden;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.3) inset,
+    0 8px 24px rgba(255,198,26,.35),
+    0 16px 48px rgba(255,198,26,.2);
+  transition:all .4s cubic-bezier(.22,.61,.36,1);
+}
+.btn:before {
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(255,255,255,.2), transparent 60%);
+  opacity:0; transition:opacity .3s;
+}
+.btn:hover {
+  transform:translateY(-3px) scale(1.02);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.4) inset,
+    0 12px 32px rgba(255,198,26,.45),
+    0 24px 64px rgba(255,198,26,.25);
+}
+.btn:hover:before { opacity:1; }
+
+/* Layout grids */
+.two {
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:clamp(40px,6vw,80px);
+  align-items:center;
+}
+.card-grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:clamp(16px,2vw,24px);
+  margin-top:clamp(40px,5vh,52px);
+}
+.card-grid.three { grid-template-columns:repeat(3,1fr); }
+.card-grid.two { grid-template-columns:repeat(2,1fr); gap:clamp(20px,3vw,32px); }
+
+/* Premium cards with enhanced depth */
+.card {
+  min-height:clamp(180px,22vh,220px);
+  border:1px solid rgba(255,255,255,.11);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.025) 100%);
+  border-radius:clamp(24px,3vw,32px);
+  padding:clamp(36px,4.5vw,48px) clamp(28px,3.5vw,38px);
+  backdrop-filter:blur(32px) saturate(180%);
+  position:relative; overflow:hidden;
+  transition:all .45s cubic-bezier(.22,.61,.36,1);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.08) inset,
+    0 8px 32px rgba(0,0,0,.4),
+    0 2px 8px rgba(0,0,0,.2);
+  text-align:center;
+}
+.card:before {
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,198,26,.08), transparent 70%);
+  opacity:0; transition:opacity .4s;
+}
+.card:after {
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  background:linear-gradient(135deg, rgba(255,255,255,.05) 0%, transparent 50%);
+  opacity:0; transition:opacity .4s;
+}
+.card h3 {
+  font-size:clamp(22px,2.6vw,36px);
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:-.03em;
+  margin-bottom:clamp(14px,1.8vh,20px);
+  background:linear-gradient(135deg, var(--white) 0%, rgba(255,255,255,.85) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  min-height:clamp(48px,6vh,64px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.card p {
+  font-size:clamp(15px,1.6vw,19px);
+  line-height:1.6;
+  color:rgba(180,180,180,.95);
+  letter-spacing:-.01em;
+  font-weight:400;
+}
+.card:hover {
+  transform:translateY(-6px) scale(1.01);
+  border-color:rgba(255,198,26,.22);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.12) inset,
+    0 16px 48px rgba(0,0,0,.5),
+    0 0 0 1px rgba(255,198,26,.12),
+    0 8px 32px rgba(255,198,26,.12);
+}
+.card:hover:before { opacity:1; }
+.card:hover:after { opacity:1; }
+
+/* Enhanced cards for feature-rich sections */
+.card.enhanced {
+  min-height:clamp(200px,24vh,240px);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,.035) 100%);
+  border:1px solid rgba(255,255,255,.16);
+  padding:clamp(38px,4.8vw,50px) clamp(32px,4vw,42px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.12) inset,
+    0 16px 48px rgba(0,0,0,.55),
+    0 2px 6px rgba(0,0,0,.3);
+}
+.card.enhanced h3 {
+  font-size:clamp(24px,2.6vw,34px);
+  margin-bottom:clamp(16px,2vh,22px);
+  font-weight:800;
+}
+.card.enhanced p {
+  font-size:clamp(16px,1.7vw,19px);
+  line-height:1.7;
+  color:#b0b0b0;
+}
+.card.enhanced:hover {
+  transform:translateY(-10px) scale(1.02);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.18) inset,
+    0 24px 64px rgba(0,0,0,.65),
+    0 0 0 1px rgba(255,198,26,.25),
+    0 16px 48px rgba(255,198,26,.2);
+}
+
+/* Icon box with glow */
+.icon-box {
+  width:clamp(44px,5vw,52px); height:clamp(44px,5vw,52px);
+  border-radius:clamp(14px,2vw,18px);
+  border:1px solid rgba(255,198,26,.4);
+  background:
+    linear-gradient(135deg, rgba(255,198,26,.15), rgba(255,198,26,.05));
+  display:grid; place-items:center; color:var(--yellow);
+  margin-bottom:clamp(20px,2.5vh,28px);
+  font-weight:850; font-size:clamp(20px,2.2vw,26px);
+  box-shadow:
+    0 0 24px rgba(255,198,26,.2),
+    0 1px 0 rgba(255,255,255,.1) inset;
+  position:relative;
+}
+.icon-box:before {
+  content:""; position:absolute; inset:-2px;
+  background:linear-gradient(135deg, rgba(255,198,26,.3), transparent);
+  border-radius:inherit; z-index:-1; opacity:0;
+  transition:opacity .3s;
+}
+.card:hover .icon-box:before { opacity:1; }
+
+/* Flow steps with premium style */
+.flow {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:clamp(12px,1.5vw,16px);
+  margin-top:clamp(40px,5vh,60px);
+}
+.step {
+  border:1px solid rgba(255,255,255,.11);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border-radius:clamp(20px,2.5vw,28px);
+  padding:clamp(20px,2.5vw,28px) clamp(16px,2vw,22px);
+  min-height:clamp(140px,18vh,180px);
+  position:relative; overflow:hidden;
+  backdrop-filter:blur(12px);
+  transition:all .4s cubic-bezier(.22,.61,.36,1);
+  box-shadow:0 4px 16px rgba(0,0,0,.3);
+}
+.step:before {
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(circle at 50% 0%, rgba(255,198,26,.08), transparent 70%);
+  opacity:0; transition:opacity .3s;
+}
+.step:hover {
+  transform:translateY(-4px);
+  border-color:rgba(255,198,26,.25);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.4),
+    0 0 0 1px rgba(255,198,26,.1);
+}
+.step:hover:before { opacity:1; }
+.step .num {
+  color:var(--yellow); font-size:clamp(11px,1.2vw,13px);
+  font-weight:900; letter-spacing:.12em;
+  margin-bottom:clamp(16px,2vh,20px);
+  text-shadow:0 0 12px rgba(255,198,26,.5);
+}
+.step h3 { font-size:clamp(18px,2vw,22px); margin-bottom:clamp(8px,1vh,12px); }
+.step p { font-size:clamp(13px,1.4vw,15px); line-height:1.5; color:var(--muted); }
+
+/* Big number with premium effect */
+.big-number {
+  color:var(--yellow);
+  font-size:clamp(120px,18vw,240px);
+  line-height:.8; letter-spacing:-.08em; font-weight:900;
+  background:linear-gradient(135deg, var(--yellow) 0%, var(--yellow-glow) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  filter:drop-shadow(0 0 40px rgba(255,198,26,.3));
+}
+
+/* List with better spacing */
+.list {
+  display:flex; flex-direction:column;
+  gap:clamp(16px,2vh,22px);
+  margin-top:clamp(28px,3.5vh,40px);
+}
+.item {
+  display:flex; gap:clamp(12px,1.5vw,16px); align-items:flex-start;
+  font-size:clamp(18px,1.9vw,21px); color:#d0d0d0; line-height:1.45;
+  letter-spacing:-.012em;
+}
+.item .mark {
+  color:var(--yellow); font-weight:900; min-width:clamp(16px,2vw,20px);
+  text-shadow:0 0 12px rgba(255,198,26,.4);
+}
+
+/* Premium panels */
+.panel {
+  border:1px solid rgba(255,255,255,.12);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.025) 100%);
+  border-radius:clamp(28px,3.5vw,40px);
+  padding:clamp(32px,4vw,48px);
+  min-height:clamp(340px,42vh,440px);
+  position:relative; overflow:hidden;
+  backdrop-filter:blur(24px) saturate(180%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.08) inset,
+    0 12px 40px rgba(0,0,0,.4);
+  transition:all .4s cubic-bezier(.22,.61,.36,1);
+}
+.panel:before {
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+}
+.panel:hover {
+  transform:translateY(-4px);
+  border-color:rgba(255,198,26,.2);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.12) inset,
+    0 16px 48px rgba(0,0,0,.5),
+    0 0 0 1px rgba(255,198,26,.1);
+}
+.panel h3 {
+  margin-bottom:clamp(24px,3vh,32px);
+  font-size:clamp(26px,3vw,36px);
+  letter-spacing:-.025em;
+}
+.compare {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:clamp(20px,3vw,32px);
+  margin-top:clamp(40px,5vh,56px);
+}
+
+/* Responsive */
+@media(max-width:1024px){
+  .slide { min-height:900px; }
+  .two, .compare { grid-template-columns:1fr; gap:clamp(32px,5vh,48px); }
+  .card-grid, .flow { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:640px){
+  .card-grid, .flow { grid-template-columns:1fr; }
+  .wordmark { font-size:24px; left:24px; top:28px; }
+}
+
+/* Prevent flash during language switch */
+body.restoring-scroll {
+  visibility: hidden;
+}
+</style>
+
+<script>
+// Restore scroll position IMMEDIATELY before page renders
+(function() {
+  try {
+    const savedSlide = sessionStorage.getItem('slidePosition');
+    if (savedSlide !== null) {
+      // Hide body during restoration to prevent flash
+      document.documentElement.classList.add('restoring-scroll');
+
+      window.addEventListener('DOMContentLoaded', function() {
+        const slideHeight = window.innerHeight;
+        window.scrollTo(0, parseInt(savedSlide) * slideHeight);
+        sessionStorage.removeItem('slidePosition');
+
+        // Show content after scrolling
+        requestAnimationFrame(function() {
+          document.documentElement.classList.remove('restoring-scroll');
+        });
+      });
+    }
+  } catch(err) {}
+})();
+</script>
+
+</head>
+<body>
+
+<script>
+// Restore scroll position IMMEDIATELY when body starts loading
+(function() {
+  try {
+    const savedSlide = sessionStorage.getItem('slidePosition');
+    if (savedSlide !== null) {
+      const slideHeight = window.innerHeight;
+      window.scrollTo(0, parseInt(savedSlide) * slideHeight);
+      sessionStorage.removeItem('slidePosition');
+      document.documentElement.classList.remove('restoring-scroll');
+    }
+  } catch(err) {}
+})();
+</script>
+
+<div class="wordmark">iFanzy</div>
+
+<div class="lang-switcher">
+<a href="creator_recruitment.html" class="lang-btn">EN</a>
+<a href="creator_recruitment_tc.html" class="lang-btn active">繁中</a>
+</div>
+
+<!-- Slide 1: Hero -->
+<section class="slide">
+<div class="content center">
+<div class="kicker">創作者變現</div>
+<h1>接入社交平台<br/>AI全面變現<br/><span class="yellow">坐享其成</span></h1>
+<p class="tagline">
+您的粉絲自動變成營收—24 / 7全天候
+</p>
+<div class="accent"></div>
+<div style="margin-top:clamp(48px,6vh,64px)">
+<a href="#contact" class="btn">立即開始賺錢 →</a>
+</div>
+</div>
+</section>
+
+<!-- Slide 2: 24小時困境 -->
+<section class="slide">
+<div class="content center">
+<div class="kicker">您的現實</div>
+<h2>永不停歇<br/><span class="yellow">永不滿足</span></h2>
+<p class="tagline" style="margin-top:clamp(28px,3.5vh,40px);margin-bottom:clamp(48px,6vh,64px);max-width:780px;font-size:clamp(17px,1.8vw,21px);line-height:1.6">
+數百萬粉絲 零休息時間 您停下來 營收就停
+</p>
+<div class="card-grid">
+<div class="card">
+<h3>早上6點</h3>
+<p>創作內容</p>
+</div>
+<div class="card">
+<h3>上午10點</h3>
+<p>回覆私訊</p>
+</div>
+<div class="card">
+<h3>下午2點</h3>
+<p>開會</p>
+</div>
+<div class="card">
+<h3>晚上6點</h3>
+<p>與粉絲互動</p>
+</div>
+<div class="card">
+<h3>晚上10點</h3>
+<p>直播</p>
+</div>
+<div class="card">
+<h3>凌晨2點</h3>
+<p>全球時區</p>
+</div>
+<div class="card">
+<h3>早上6點</h3>
+<p>循環往復</p>
+</div>
+<div class="card" style="background:linear-gradient(135deg,rgba(255,198,26,.15),rgba(255,198,26,.05));border-color:rgba(255,198,26,.35);box-shadow:0 8px 32px rgba(255,198,26,.2)">
+<h3 style="color:var(--yellow);font-size:clamp(30px,3.5vw,48px)">過勞</h3>
+<p style="color:rgba(255,255,255,.8);font-weight:500">撐不下去了</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 3: 瓶頸問題 -->
+<section class="slide">
+<div class="content center">
+<div class="kicker">瓶頸所在</div>
+<h2>24小時 × 24時區 × <span class="yellow">∞ 粉絲</span></h2>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(28px,3.5vw,40px);max-width:1200px;margin:clamp(64px,8vh,88px) auto 0">
+
+<div style="background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.1);border-radius:clamp(20px,2.5vw,28px);padding:clamp(48px,6vh,64px) clamp(28px,3.5vw,36px);text-align:center;position:relative;overflow:hidden;backdrop-filter:blur(20px);min-height:clamp(280px,35vh,340px)">
+<div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,198,26,.3),transparent)"></div>
+<div style="font-size:clamp(64px,8vw,96px);font-weight:900;line-height:1;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:clamp(24px,3vh,32px)">24</div>
+<p style="font-size:clamp(16px,1.7vw,19px);color:rgba(255,255,255,.9);font-weight:600;margin-bottom:clamp(20px,2.5vh,24px);letter-spacing:-.01em">一天只有24小時</p>
+<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);margin:0 auto clamp(20px,2.5vh,24px);width:60%"></div>
+<p style="font-size:clamp(14px,1.5vw,17px);color:rgba(160,160,160,.9);line-height:1.6;font-weight:400">您無法永遠工作</p>
+</div>
+
+<div style="background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.1);border-radius:clamp(20px,2.5vw,28px);padding:clamp(48px,6vh,64px) clamp(28px,3.5vw,36px);text-align:center;position:relative;overflow:hidden;backdrop-filter:blur(20px);min-height:clamp(280px,35vh,340px)">
+<div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,198,26,.3),transparent)"></div>
+<div style="font-size:clamp(64px,8vw,96px);font-weight:900;line-height:1;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:clamp(24px,3vh,32px)">24</div>
+<p style="font-size:clamp(16px,1.7vw,19px);color:rgba(255,255,255,.9);font-weight:600;margin-bottom:clamp(20px,2.5vh,24px);letter-spacing:-.01em">全球24個時區</p>
+<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);margin:0 auto clamp(20px,2.5vh,24px);width:60%"></div>
+<p style="font-size:clamp(14px,1.5vw,17px);color:rgba(160,160,160,.9);line-height:1.6;font-weight:400">您睡覺時粉絲正醒著</p>
+</div>
+
+<div style="background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.1);border-radius:clamp(20px,2.5vw,28px);padding:clamp(48px,6vh,64px) clamp(28px,3.5vw,36px);text-align:center;position:relative;overflow:hidden;backdrop-filter:blur(20px);min-height:clamp(280px,35vh,340px)">
+<div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,198,26,.3),transparent)"></div>
+<div style="font-size:clamp(64px,8vw,96px);font-weight:900;line-height:1;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:clamp(24px,3vh,32px)">∞</div>
+<p style="font-size:clamp(16px,1.7vw,19px);color:rgba(255,255,255,.9);font-weight:600;margin-bottom:clamp(20px,2.5vh,24px);letter-spacing:-.01em">等待中的粉絲</p>
+<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);margin:0 auto clamp(20px,2.5vh,24px);width:60%"></div>
+<p style="font-size:clamp(14px,1.5vw,17px);color:rgba(160,160,160,.9);line-height:1.6;font-weight:400">您正在錯失的營收</p>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- Slide 4: AI不取代你 -->
+<section class="slide">
+<div class="content">
+<div class="two">
+<div>
+<div class="kicker">AI為您工作</div>
+<h2>您的AI分身<br/><span class="yellow">不會取代您</span></h2>
+<div class="list">
+<div class="item"><span class="mark">✓</span> 您永遠掌控一切</div>
+<div class="item"><span class="mark">✓</span> AI承擔所有繁瑣互動</div>
+<div class="item"><span class="mark">✓</span> 您只管專心創作</div>
+<div class="item"><span class="mark">✓</span> 粉絲全天候被照顧</div>
+<div class="item"><span class="mark">✓</span> 躺著也能賺錢</div>
+</div>
+</div>
+<div style="text-align:center">
+<p style="font-size:clamp(32px,4vw,56px);font-weight:900;line-height:1.2;margin-bottom:clamp(32px,4vh,48px)">
+您 + <span class="yellow">AI分身</span>
+</p>
+<p style="font-size:clamp(18px,2vw,24px);color:var(--gray);line-height:1.6">
+您的AI為您工作<br/>而非取代您
+</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 5: 3步流程 -->
+<section class="slide">
+<div class="content center">
+<div class="kicker">如何運作</div>
+<h2>只需<span class="yellow">三步</span><br/>立即開始賺錢</h2>
+<div style="max-width:1000px;margin:clamp(64px,8vh,88px) auto 0;display:grid;gap:clamp(48px,6vh,64px)">
+
+<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(32px,4vw,48px);align-items:start">
+<div style="width:clamp(56px,7vw,72px);height:clamp(56px,7vw,72px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3vw,32px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">1</div>
+<div style="text-align:left">
+<h3 style="font-size:clamp(24px,2.8vw,36px);margin-bottom:clamp(12px,1.5vh,16px);font-weight:800">驗證身份</h3>
+<p style="font-size:clamp(16px,1.7vw,20px);color:rgba(180,180,180,.95);line-height:1.6">掃描臉部確認身份——只有真實的您能創建AI分身，杜絕冒充。</p>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(32px,4vw,48px);align-items:start">
+<div style="width:clamp(56px,7vw,72px);height:clamp(56px,7vw,72px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3vw,32px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">2</div>
+<div style="text-align:left">
+<h3 style="font-size:clamp(24px,2.8vw,36px);margin-bottom:clamp(12px,1.5vh,16px);font-weight:800">訓練您的AI</h3>
+<p style="font-size:clamp(16px,1.7vw,20px);color:rgba(180,180,180,.95);line-height:1.6">上傳內容設定個性——AI學會像您一樣說話、互動。</p>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(32px,4vw,48px);align-items:start">
+<div style="width:clamp(56px,7vw,72px);height:clamp(56px,7vw,72px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3vw,32px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">3</div>
+<div style="text-align:left">
+<h3 style="font-size:clamp(24px,2.8vw,36px);margin-bottom:clamp(12px,1.5vh,16px);font-weight:800;color:var(--yellow)">全天候賺錢</h3>
+<p style="font-size:clamp(16px,1.7vw,20px);color:rgba(180,180,180,.95);line-height:1.6">上線即開始——24 / 7直播、互動、營收，睡覺時也在賺。</p>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- Slide 6: 24 / 7工作 -->
+<section class="slide">
+<div class="content">
+<div class="two">
+<div style="text-align:center">
+<div class="big-number">24 / 7</div>
+<p style="margin-top:clamp(24px,3vh,36px);font-size:clamp(20px,2.4vw,28px);color:var(--yellow);font-weight:700;letter-spacing:-.015em">
+永不睡覺，永不停歇
+</p>
+</div>
+<div>
+<div class="kicker">全天候在線</div>
+<h2>您的AI分身<br/><span class="yellow">無需停歇</span></h2>
+<div class="list">
+<div class="item"><span class="mark">→</span> 您睡覺時與粉絲聊天</div>
+<div class="item"><span class="mark">→</span> 跨所有時區直播</div>
+<div class="item"><span class="mark">→</span> 即時回覆每條訊息</div>
+<div class="item"><span class="mark">→</span> 24 / 7自動銷售內容</div>
+<div class="item"><span class="mark">→</span> 在粉絲最活躍時互動</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 7: AI功能 -->
+<section class="slide">
+<div class="content center">
+<div class="kicker">AI功能</div>
+<h2>您的AI分身<br/><span class="yellow">能做什麼</span></h2>
+<div class="card-grid" style="margin-top:clamp(48px,6vh,64px)">
+<div class="card enhanced">
+<h3>AI聊天</h3>
+<p>同時與數千粉絲進行自然對話</p>
+</div>
+<div class="card enhanced">
+<h3>AI直播</h3>
+<p>24 / 7全天候直播，即時互動和參與</p>
+</div>
+<div class="card enhanced">
+<h3>AI銷售</h3>
+<p>推薦和銷售您的內容、訂閱和產品</p>
+</div>
+<div class="card enhanced">
+<h3>AI互動</h3>
+<p>通過個性化互動建立粉絲關係</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 8: 安全控制 -->
+<section class="slide">
+<div class="content center">
+<div class="kicker">您掌控一切</div>
+<h2>安全與控制<br/><span class="yellow">雙重保障</span></h2>
+<p class="tagline" style="margin-top:clamp(20px,2.5vh,28px);margin-bottom:0">
+您的AI始終在您設定的規則內運作
+</p>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,24px);margin-top:clamp(44px,5.5vh,56px);max-width:1200px;margin-left:auto;margin-right:auto">
+<div class="card">
+<h3>內容審核</h3>
+<p>在AI生成內容上線前審核並批准</p>
+</div>
+<div class="card">
+<h3>對話邊界</h3>
+<p>設定AI可討論的話題範圍</p>
+</div>
+<div class="card">
+<h3>真人接管</h3>
+<p>隨時跳入接管您的AI控制</p>
+</div>
+<div class="card">
+<h3>營收上限</h3>
+<p>設定AI每次互動的收費限制</p>
+</div>
+<div class="card">
+<h3>隱私保護</h3>
+<p>您的個人資料保持私密和安全</p>
+</div>
+<div class="card">
+<h3>活動監控</h3>
+<p>即時查看您的AI所做的一切</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 9: 8種變現 -->
+<section class="slide">
+<div class="content center">
+<div class="kicker">變現模式</div>
+<h2>用您的AI分身<br/><span class="yellow">8種方式</span>變現</h2>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(20px,2.5vw,28px);margin-top:clamp(48px,6vh,64px);max-width:1400px;margin-left:auto;margin-right:auto">
+<div class="card">
+<h3>訂閱收入</h3>
+<p>粉絲每月付費訂閱</p>
+</div>
+<div class="card">
+<h3>打賞收益</h3>
+<p>直播和聊天中的打賞</p>
+</div>
+<div class="card">
+<h3>付費內容</h3>
+<p>獨家照片、影片和內容銷售</p>
+</div>
+<div class="card">
+<h3>AI直播</h3>
+<p>24 / 7 AI直播自動營收</p>
+</div>
+<div class="card">
+<h3>虛擬禮物</h3>
+<p>粉絲互動中的禮物收入</p>
+</div>
+<div class="card">
+<h3>商品推廣</h3>
+<p>AI自動推廣您的產品</p>
+</div>
+<div class="card">
+<h3>品牌合作</h3>
+<p>與品牌商合作推廣營收</p>
+</div>
+<div class="card">
+<h3>專屬服務</h3>
+<p>提供VIP專屬互動服務</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 10: 收入增長 -->
+<section class="slide">
+<div class="content">
+<div class="two">
+<div>
+<div class="kicker">收入潛力</div>
+<h2>倍增您的<br/><span class="yellow">收入</span></h2>
+<p style="margin-top:clamp(32px,4vh,48px);font-size:clamp(20px,2.2vw,26px);color:var(--gray);line-height:1.6">
+您的AI分身全天候工作，與粉絲互動並產生營收，而您專注創作
+</p>
+</div>
+<div>
+<div class="compare">
+<div class="panel" style="background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 12px 40px rgba(0,0,0,.45);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+<h3 style="color:#999;font-size:clamp(32px,3.8vw,48px);margin-bottom:clamp(24px,3vh,36px);line-height:1;white-space:nowrap">沒有AI</h3>
+<p class="small" style="font-size:clamp(17px,1.9vw,22px);line-height:1.65;max-width:320px">受限於您的工作時間和精力</p>
+</div>
+<div class="panel" style="background:linear-gradient(135deg,rgba(255,198,26,.14),rgba(255,198,26,.05));border:1px solid rgba(255,198,26,.45);box-shadow:0 1px 0 rgba(255,198,26,.15) inset,0 12px 40px rgba(0,0,0,.45),0 0 0 1px rgba(255,198,26,.12),0 8px 32px rgba(255,198,26,.15);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+<h3 style="color:var(--yellow);font-size:clamp(32px,3.8vw,48px);margin-bottom:clamp(24px,3vh,36px);text-shadow:0 0 20px rgba(255,198,26,.3);line-height:1;white-space:nowrap">有AI</h3>
+<p class="small" style="color:var(--gray);font-size:clamp(17px,1.9vw,22px);line-height:1.65;max-width:320px">跨所有時區全天候賺錢</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 11: 創作者後台 -->
+<section class="slide">
+<div class="content center">
+<div class="kicker">創作者控制中心</div>
+<h2><span class="yellow">統一管理</span><br/>輕鬆變現</h2>
+<div class="card-grid" style="margin-top:clamp(56px,7vh,80px)">
+<div class="card enhanced">
+<h3>AI分身工作室</h3>
+<p>訓練和設定AI個性</p>
+</div>
+<div class="card enhanced">
+<h3>直播控制</h3>
+<p style="white-space:nowrap">啟動AI直播或親自上線</p>
+</div>
+<div class="card enhanced">
+<h3>對話監控</h3>
+<p>即時查看AI互動內容</p>
+</div>
+<div class="card enhanced">
+<h3>內容資產庫</h3>
+<p>管理貼文、照片、影片和AI素材</p>
+</div>
+<div class="card enhanced">
+<h3>營收儀表板</h3>
+<p style="white-space:nowrap">追蹤收入、訂閱與打賞</p>
+</div>
+<div class="card enhanced">
+<h3>粉絲分析</h3>
+<p>了解受眾並優化增長</p>
+</div>
+<div class="card enhanced">
+<h3>錢包</h3>
+<p>安全提現與管理營收</p>
+</div>
+<div class="card enhanced">
+<h3>設定</h3>
+<p>配置AI行為和規則</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 12: vs 普通AI -->
+<section class="slide">
+<div class="content center">
+<div class="kicker">為何選擇 iFANZY</div>
+<h2>授權AI分身<br/><span class="yellow">vs</span><br/>普通AI</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,4vw,56px);max-width:1400px;margin:clamp(56px,7vh,80px) auto 0">
+<div class="panel">
+<h3 style="font-size:clamp(26px,3vw,36px);margin-bottom:clamp(28px,3.5vh,40px);color:#999">普通AI機器人</h3>
+<div class="list">
+<div class="item"><span class="mark">✗</span> 千篇一律的回應</div>
+<div class="item"><span class="mark">✗</span> 毫無個性</div>
+<div class="item"><span class="mark">✗</span> 無法變現</div>
+<div class="item"><span class="mark">✗</span> 不支援直播</div>
+<div class="item"><span class="mark">✗</span> 未經授權</div>
+</div>
+</div>
+<div class="panel" style="background:linear-gradient(135deg,rgba(255,198,26,.12),rgba(255,198,26,.04));border-color:rgba(255,198,26,.4)">
+<h3 style="font-size:clamp(26px,3vw,36px);margin-bottom:clamp(28px,3.5vh,40px);color:var(--yellow)">您的專屬AI分身</h3>
+<div class="list">
+<div class="item"><span class="mark">✓</span> 完全複製您的說話方式</div>
+<div class="item"><span class="mark">✓</span> 您的獨特個性與風格</div>
+<div class="item"><span class="mark">✓</span> 全天候自動變現</div>
+<div class="item"><span class="mark">✓</span> 內建AI直播功能</div>
+<div class="item"><span class="mark">✓</span> 創作者本人授權認證</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 13: 早期優勢 -->
+<section class="slide">
+<div class="content center">
+<div class="kicker">早期優勢</div>
+<h2>加入<br/><span class="yellow">AI創作者時代</span></h2>
+<p class="tagline" style="margin-top:clamp(32px,4vh,48px);margin-bottom:clamp(56px,7vh,80px)">
+最早採用AI的創作者將主導下一個十年
+</p>
+<div class="card-grid three">
+<div class="card enhanced">
+<h3>先行者優勢</h3>
+<p>當您的競爭對手還在睡覺時，成為首批擁有AI分身的創作者</p>
+</div>
+<div class="card enhanced">
+<h3>平台成長</h3>
+<p>隨著iFanzy成為未來的AI創作者平台一起成長</p>
+</div>
+<div class="card enhanced">
+<h3>競爭護城河</h3>
+<p>建立其他人無法複製的AI驅動粉絲忠誠度</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 17: CTA -->
+<section class="slide" id="contact">
+<div class="content center">
+<div class="kicker">加入AI創作者革命</div>
+<h2>準備好建立您的<br/><span class="yellow">AI帝國？</span></h2>
+<p class="tagline" style="font-size:clamp(20px,2.4vw,28px);margin-top:clamp(32px,4vh,48px);line-height:1.5">
+別再失眠。別再錯過機會。<br/>
+讓您的AI分身在您創作時工作。
+</p>
+<div class="accent"></div>
+<div style="margin-top:clamp(56px,7vh,72px);display:flex;flex-direction:column;gap:clamp(18px,2.5vh,28px);align-items:center">
+<div style="font-size:clamp(19px,2.1vw,24px);letter-spacing:-.012em">
+<a href="https://www.ifanzy.com" style="color:var(--yellow);text-decoration:none;font-weight:700;text-shadow:0 0 20px rgba(255,198,26,.3)">www.ifanzy.com</a>
+</div>
+<div style="font-size:clamp(19px,2.1vw,24px);letter-spacing:-.012em">
+<a href="mailto:business@ifanzy.com" style="color:var(--yellow);text-decoration:none;font-weight:700;text-shadow:0 0 20px rgba(255,198,26,.3)">business@ifanzy.com</a>
+</div>
+</div>
+<div style="margin-top:clamp(48px,6vh,64px)">
+<a href="mailto:business@ifanzy.com" class="btn" style="font-size:clamp(16px,1.8vw,19px);padding:clamp(18px,2.5vh,24px) clamp(36px,5vw,52px)">
+申請加入 iFanzy →
+</a>
+</div>
+</div>
+</section>
+
+<script>
+// Language switcher - only save position, restoration happens in head
+document.addEventListener('DOMContentLoaded', function() {
+  // Save scroll position before navigation
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const currentScroll = window.pageYOffset || window.scrollY || 0;
+      const slideHeight = window.innerHeight;
+      const currentSlide = Math.round(currentScroll / slideHeight);
+
+      try {
+        sessionStorage.setItem('slidePosition', currentSlide);
+      } catch(err) {
+        console.log('Storage error:', err);
+      }
+      // Let default navigation happen
+    });
+  });
+});
+</script>
+
+</body>
+</html>
