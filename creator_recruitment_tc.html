@@ -101,12 +101,14 @@ body {
 
 /* Typography with better spacing */
 .kicker {
-  color:var(--yellow); font-size:clamp(16px,1.8vw,20px);
-  font-weight:800; letter-spacing:.18em; text-transform:uppercase;
-  margin-bottom:clamp(20px,2.5vh,32px);
-  opacity:.9;
+  color:var(--yellow);
+  font-family:"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  font-size:clamp(22px,2.6vw,30px);
+  font-weight:900; letter-spacing:.14em; text-transform:uppercase;
+  margin-bottom:clamp(24px,3vh,36px);
+  opacity:1;
   position:relative; display:inline-block;
-  text-shadow:0 0 20px rgba(255,198,26,.3);
+  text-shadow:0 0 30px rgba(255,198,26,.55), 0 2px 8px rgba(0,0,0,.4);
 }
 h1 {
   margin:0; font-size:clamp(42px,5.2vw,68px);
@@ -758,35 +760,45 @@ OnlyFans / Patreon 保持不變 + 新增 iFanzy = 雙重收入，零額外工作
 
 <!-- Slide 6: 3步流程 -->
 <section class="slide">
-<div class="content center">
+<div class="content">
+<div class="two">
+<div style="text-align:center">
+<div class="big-number">3</div>
+<p style="margin-top:clamp(24px,3vh,36px);font-size:clamp(20px,2.4vw,28px);color:var(--yellow);font-weight:700;letter-spacing:-.015em">
+三步立即開始賺錢
+</p>
+</div>
+<div>
 <div class="kicker">如何運作</div>
 <h2>只需<span class="yellow">三步</span><br/>立即開始賺錢</h2>
-<div style="max-width:1000px;margin:clamp(64px,8vh,88px) auto 0;display:grid;gap:clamp(48px,6vh,64px)">
+<div style="margin-top:clamp(36px,4.5vh,52px);display:grid;gap:clamp(24px,3vh,32px)">
 
-<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(32px,4vw,48px);align-items:start">
-<div style="width:clamp(56px,7vw,72px);height:clamp(56px,7vw,72px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3vw,32px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">1</div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,2.5vw,28px);align-items:start">
+<div style="width:clamp(48px,5.5vw,60px);height:clamp(48px,5.5vw,60px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(20px,2.4vw,28px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">1</div>
 <div style="text-align:left">
-<h3 style="font-size:clamp(24px,2.8vw,36px);margin-bottom:clamp(12px,1.5vh,16px);font-weight:800">驗證身份</h3>
-<p style="font-size:clamp(16px,1.7vw,20px);color:rgba(180,180,180,.95);line-height:1.6">掃描臉部確認身份——只有真實的您能創建AI分身，杜絕冒充。</p>
+<h3 style="font-size:clamp(20px,2.2vw,26px);margin-bottom:clamp(8px,1vh,12px);font-weight:800">驗證身份</h3>
+<p style="font-size:clamp(15px,1.6vw,18px);color:rgba(180,180,180,.95);line-height:1.55">掃描臉部確認身份——只有真實的您能創建AI分身，杜絕冒充。</p>
 </div>
 </div>
 
-<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(32px,4vw,48px);align-items:start">
-<div style="width:clamp(56px,7vw,72px);height:clamp(56px,7vw,72px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3vw,32px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">2</div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,2.5vw,28px);align-items:start">
+<div style="width:clamp(48px,5.5vw,60px);height:clamp(48px,5.5vw,60px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(20px,2.4vw,28px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">2</div>
 <div style="text-align:left">
-<h3 style="font-size:clamp(24px,2.8vw,36px);margin-bottom:clamp(12px,1.5vh,16px);font-weight:800">訓練您的AI</h3>
-<p style="font-size:clamp(16px,1.7vw,20px);color:rgba(180,180,180,.95);line-height:1.6">上傳內容設定個性——AI學會像您一樣說話、互動。</p>
+<h3 style="font-size:clamp(20px,2.2vw,26px);margin-bottom:clamp(8px,1vh,12px);font-weight:800">訓練您的AI</h3>
+<p style="font-size:clamp(15px,1.6vw,18px);color:rgba(180,180,180,.95);line-height:1.55">上傳內容設定個性——AI學會像您一樣說話、互動。</p>
 </div>
 </div>
 
-<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(32px,4vw,48px);align-items:start">
-<div style="width:clamp(56px,7vw,72px);height:clamp(56px,7vw,72px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3vw,32px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">3</div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,2.5vw,28px);align-items:start">
+<div style="width:clamp(48px,5.5vw,60px);height:clamp(48px,5.5vw,60px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(20px,2.4vw,28px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">3</div>
 <div style="text-align:left">
-<h3 style="font-size:clamp(24px,2.8vw,36px);margin-bottom:clamp(12px,1.5vh,16px);font-weight:800;color:var(--yellow)">全天候賺錢</h3>
-<p style="font-size:clamp(16px,1.7vw,20px);color:rgba(180,180,180,.95);line-height:1.6">上線即開始——24 / 7直播、互動、營收，睡覺時也在賺。</p>
+<h3 style="font-size:clamp(20px,2.2vw,26px);margin-bottom:clamp(8px,1vh,12px);font-weight:800;color:var(--yellow)">全天候賺錢</h3>
+<p style="font-size:clamp(15px,1.6vw,18px);color:rgba(180,180,180,.95);line-height:1.55">上線即開始——24 / 7直播、互動、營收，睡覺時也在賺。</p>
 </div>
 </div>
 
+</div>
+</div>
 </div>
 </div>
 </section>
@@ -929,7 +941,7 @@ OnlyFans / Patreon 保持不變 + 新增 iFanzy = 雙重收入，零額外工作
 <div class="kicker">收入潛力</div>
 <h2>倍增您的<br/><span class="yellow">收入</span></h2>
 <p style="margin-top:clamp(32px,4vh,48px);font-size:clamp(20px,2.2vw,26px);color:var(--gray);line-height:1.6">
-您的AI分身全天候工作，與粉絲互動並產生營收，而您專注創作
+您的AI分身全天候工作，與粉絲互動並持續變現，而您無需動手，盡享自由
 </p>
 </div>
 <div>
