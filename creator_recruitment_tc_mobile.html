@@ -1,0 +1,2520 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>iFanzy 創作者 Mobile - 您的AI分身在您睡覺時工作</title>
+<style>
+:root {
+  --bg:#0a0a0a;
+  --panel:#151515;
+  --yellow:#ffc61a;
+  --yellow-glow:#ffdb4d;
+  --white:#ffffff;
+  --gray:#b4b4b4;
+  --muted:#767676;
+  --line:rgba(255,255,255,.11);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-snap-type:y mandatory; scroll-behavior:smooth; }
+body {
+  background:var(--bg); color:var(--white);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+
+/* Enhanced background with texture */
+.slide {
+  position:relative; width:100vw; height:100vh; min-height:100vh;
+  padding:0; scroll-snap-align:start; overflow:hidden;
+  background:
+    radial-gradient(circle at 75% 20%, rgba(255,198,26,.15), transparent 35%),
+    radial-gradient(circle at 25% 80%, rgba(255,198,26,.08), transparent 40%),
+    var(--bg);
+}
+.slide:before {
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:1;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:
+    radial-gradient(ellipse 90% 60% at 50% 20%, rgba(0,0,0,.8), transparent 85%),
+    linear-gradient(to bottom, rgba(0,0,0,.6), transparent 90%);
+  mask-composite:intersect;
+}
+.slide:after {
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,198,26,.06), transparent 45%);
+  opacity:.6;
+}
+
+/* Brand mark */
+.wordmark {
+  position:fixed; left:clamp(32px,5vw,80px); top:clamp(32px,4vh,56px); z-index:100;
+  font-size:clamp(22px,2.2vw,32px); font-weight:900;
+  letter-spacing:-.04em; color:var(--yellow);
+  text-shadow:0 0 40px rgba(255,198,26,.4);
+}
+
+/* Language switcher */
+.lang-switcher {
+  position:fixed; right:clamp(32px,5vw,80px); top:clamp(32px,4vh,56px); z-index:100;
+  display:flex; gap:12px; align-items:center;
+}
+.lang-btn {
+  padding:10px 18px;
+  background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:8px;
+  color:var(--gray);
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .3s;
+  text-decoration:none;
+  backdrop-filter:blur(12px);
+}
+.lang-btn:hover {
+  background:linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+  border-color:rgba(255,198,26,.3);
+  color:var(--white);
+  transform:translateY(-2px);
+}
+.lang-btn.active {
+  background:linear-gradient(135deg, rgba(255,198,26,.15), rgba(255,198,26,.08));
+  border-color:rgba(255,198,26,.4);
+  color:var(--yellow);
+  box-shadow:0 0 20px rgba(255,198,26,.2);
+}
+
+/* Content container with proper centering */
+.content {
+  position:relative; z-index:2;
+  min-height:100vh;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:clamp(80px,12vh,140px) clamp(32px,6vw,100px) clamp(80px,10vh,120px);
+  max-width:1600px; margin:0 auto;
+}
+.content.center { text-align:center; align-items:center; }
+.content.hero-split {
+  display:grid;
+  grid-template-columns:minmax(430px,.98fr) minmax(360px,1.02fr);
+  align-items:center;
+  gap:clamp(12px,1.8vw,30px);
+  padding-left:clamp(54px,7vw,120px);
+  padding-right:clamp(20px,4vw,70px);
+}
+.hero-copy-left,
+.hero-copy-right {
+  text-align:left;
+}
+.hero-copy-left .kicker {
+  font-size:clamp(22px,2.15vw,31px);
+  letter-spacing:.12em;
+  line-height:1.18;
+  margin-bottom:clamp(18px,2.2vh,28px);
+}
+.hero-copy-left .tagline {
+  max-width:clamp(520px,49vw,760px);
+  margin-top:0;
+  font-size:clamp(20px,1.95vw,28px);
+  line-height:1.2;
+  color:rgba(255,255,255,.9);
+  letter-spacing:-.005em;
+  white-space:nowrap;
+}
+.hero-copy-left .hero-rule {
+  width:clamp(58px,5.5vw,86px);
+  height:3px;
+  border-radius:999px;
+  margin-top:clamp(30px,3.8vh,46px);
+  background:linear-gradient(90deg, var(--yellow), rgba(255,198,26,.08));
+  box-shadow:0 0 18px rgba(255,198,26,.35);
+}
+.hero-title-stack {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+.hero-title-card {
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:clamp(18px,2vw,24px);
+  padding:clamp(34px,3.8vw,52px) clamp(38px,4.2vw,60px);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.11), rgba(255,255,255,.035)),
+    radial-gradient(circle at 12% 0%, rgba(255,198,26,.14), transparent 42%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.14) inset,
+    0 16px 46px rgba(0,0,0,.4);
+  backdrop-filter:blur(28px) saturate(170%);
+}
+.hero-title-card:before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg, rgba(255,255,255,.12), transparent 38%, rgba(255,198,26,.08));
+  opacity:.72;
+  pointer-events:none;
+}
+.hero-title-card strong {
+  position:relative;
+  display:block;
+  color:var(--white);
+  font-size:clamp(30px,3.2vw,46px);
+  line-height:1.16;
+  letter-spacing:-.02em;
+  font-weight:850;
+}
+.hero-title-card strong span {
+  display:block;
+  white-space:nowrap;
+}
+.hero-title-card .yellow {
+  color:var(--yellow);
+  text-shadow:0 0 26px rgba(255,198,26,.28);
+}
+.hero-title-card.featured {
+  border-color:rgba(255,198,26,.34);
+  background:
+    linear-gradient(135deg, rgba(255,198,26,.14), rgba(255,255,255,.04) 58%, rgba(255,198,26,.055));
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.15) inset,
+    0 16px 48px rgba(255,198,26,.11),
+    0 18px 54px rgba(0,0,0,.42);
+}
+.hero-title-card.zh-featured {
+  padding:clamp(34px,3.8vw,52px) clamp(38px,4.2vw,60px);
+  min-width:clamp(420px,39vw,520px);
+}
+.hero-title-card.zh-featured strong {
+  font-size:clamp(36px,3.85vw,56px);
+  line-height:1.12;
+  letter-spacing:-.02em;
+}
+.hero-title-meta {
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:clamp(18px,2vw,28px);
+  margin-top:clamp(26px,3vh,38px);
+  padding-top:clamp(18px,2.2vh,28px);
+  border-top:1px solid rgba(255,255,255,.12);
+}
+.hero-title-meta span {
+  position:relative;
+  padding:0;
+  color:rgba(255,255,255,.72);
+  background:transparent;
+  border:0;
+  border-radius:0;
+  font-size:clamp(14px,1.25vw,17px);
+  font-weight:760;
+  letter-spacing:.04em;
+  white-space:nowrap;
+}
+.hero-title-meta span + span {
+  padding-left:clamp(18px,2vw,28px);
+  border-left:1px solid rgba(255,198,26,.28);
+}
+.reality-split {
+  display:grid;
+  grid-template-columns:minmax(320px,.95fr) minmax(420px,1.05fr);
+  align-items:center;
+  gap:clamp(30px,4.2vw,64px);
+}
+.reality-copy {
+  text-align:left;
+}
+.reality-copy .kicker {
+  font-size:clamp(18px,1.65vw,24px);
+  letter-spacing:.16em;
+  line-height:1.3;
+  margin-bottom:clamp(22px,2.8vh,34px);
+}
+.reality-copy h2 {
+  font-size:clamp(34px,4vw,58px);
+  line-height:1.14;
+  letter-spacing:-.03em;
+}
+.reality-copy .tagline {
+  max-width:none;
+  margin-top:clamp(24px,3vh,34px);
+  font-size:clamp(16px,1.35vw,20px);
+  line-height:1.55;
+  color:rgba(255,255,255,.72);
+  white-space:nowrap;
+}
+.reality-list {
+  width:min(100%, 520px);
+  justify-self:start;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:clamp(8px,1.05vh,12px);
+}
+.reality-item {
+  min-height:0;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:16px;
+  padding:clamp(13px,1.45vw,18px) clamp(16px,1.8vw,22px);
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:clamp(20px,2.6vw,34px);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.028)),
+    radial-gradient(circle at 8% 0%, rgba(255,198,26,.09), transparent 38%);
+  box-shadow:0 1px 0 rgba(255,255,255,.11) inset, 0 12px 34px rgba(0,0,0,.34);
+  backdrop-filter:blur(22px) saturate(160%);
+  position:relative;
+  overflow:hidden;
+}
+.reality-item:before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg, rgba(255,198,26,.1), transparent 34%, rgba(255,255,255,.04));
+  opacity:.7;
+  pointer-events:none;
+}
+.reality-item h3 {
+  position:relative;
+  min-height:0;
+  justify-content:flex-start;
+  margin:0;
+  font-size:clamp(17px,1.65vw,23px);
+  -webkit-text-fill-color:unset;
+  background:none;
+  color:rgba(255,255,255,.96);
+  min-width:clamp(92px,9vw,126px);
+}
+.reality-item p {
+  position:relative;
+  font-size:clamp(12px,1.15vw,15px);
+  line-height:1.35;
+  color:rgba(255,255,255,.62);
+  text-align:left;
+  white-space:nowrap;
+}
+.reality-item.highlight {
+  border-color:rgba(255,198,26,.44);
+  background:linear-gradient(135deg, rgba(255,198,26,.18), rgba(255,198,26,.055));
+  box-shadow:0 1px 0 rgba(255,255,255,.16) inset, 0 18px 54px rgba(255,198,26,.16);
+}
+.reality-item.highlight h3 { color:var(--yellow); }
+.bottleneck-split {
+  display:grid;
+  grid-template-columns:minmax(320px,.78fr) minmax(640px,1.22fr);
+  align-items:center;
+  gap:clamp(36px,5vw,76px);
+}
+.bottleneck-copy { text-align:left; }
+.bottleneck-copy .kicker {
+  font-size:clamp(18px,1.65vw,24px);
+  letter-spacing:.16em;
+  line-height:1.3;
+  margin-bottom:clamp(22px,2.8vh,34px);
+}
+.bottleneck-copy h2 {
+  font-size:clamp(20px,2.15vw,30px);
+  line-height:1.14;
+  letter-spacing:-.02em;
+  white-space:nowrap;
+}
+.bottleneck-grid {
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:clamp(18px,2.2vw,28px);
+}
+.bottleneck-card {
+  min-height:clamp(300px,40vh,390px);
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:clamp(18px,2vw,24px);
+  padding:clamp(36px,4.4vw,54px) clamp(22px,2.8vw,34px);
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.028)),
+    radial-gradient(circle at 50% 0%, rgba(255,198,26,.12), transparent 44%);
+  box-shadow:0 1px 0 rgba(255,255,255,.14) inset, 0 22px 66px rgba(0,0,0,.46), 0 12px 38px rgba(255,198,26,.08);
+  backdrop-filter:blur(22px) saturate(160%);
+}
+.bottleneck-card:before {
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(255,198,26,.45), transparent);
+}
+.bottleneck-number {
+  font-size:clamp(70px,7.4vw,112px);
+  font-weight:900;
+  line-height:1;
+  color:var(--yellow);
+  text-shadow:0 0 26px rgba(255,198,26,.28);
+  margin-bottom:clamp(20px,2.4vh,28px);
+}
+.bottleneck-card h3 {
+  min-height:0;
+  display:block;
+  margin:0 0 clamp(16px,2vh,22px);
+  font-size:clamp(15px,1.45vw,20px);
+  color:rgba(255,255,255,.95);
+  -webkit-text-fill-color:unset;
+  background:none;
+  white-space:nowrap;
+}
+.bottleneck-card p {
+  padding-top:clamp(16px,2vh,22px);
+  border-top:1px solid rgba(255,255,255,.12);
+  font-size:clamp(14px,1.35vw,18px);
+  line-height:1.55;
+  color:rgba(255,255,255,.6);
+}
+.ai-split {
+  display:grid;
+  grid-template-columns:minmax(300px,.82fr) minmax(560px,1.18fr);
+  align-items:center;
+  gap:clamp(38px,5vw,78px);
+}
+.ai-copy {
+  text-align:left;
+}
+.ai-copy .kicker {
+  font-size:clamp(18px,1.65vw,24px);
+  letter-spacing:.16em;
+  line-height:1.3;
+  margin-bottom:clamp(22px,2.8vh,34px);
+}
+.ai-copy h2 {
+  font-size:clamp(30px,3.35vw,48px);
+  line-height:1.14;
+  letter-spacing:-.03em;
+}
+.ai-copy .tagline {
+  max-width:440px;
+  margin-top:clamp(22px,2.8vh,32px);
+  font-size:clamp(15px,1.35vw,19px);
+  line-height:1.65;
+  color:rgba(255,255,255,.72);
+}
+.ai-grid {
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:clamp(16px,2vw,24px);
+}
+.ai-card {
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:clamp(18px,2vw,24px);
+  padding:clamp(22px,2.7vw,34px);
+  min-height:clamp(180px,23vh,240px);
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.028)),
+    radial-gradient(circle at 10% 0%, rgba(255,198,26,.12), transparent 42%);
+  box-shadow:0 1px 0 rgba(255,255,255,.12) inset, 0 16px 48px rgba(0,0,0,.38);
+  backdrop-filter:blur(22px) saturate(160%);
+}
+.ai-card:before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg, rgba(255,255,255,.1), transparent 45%, rgba(255,198,26,.06));
+  pointer-events:none;
+}
+.ai-icon {
+  position:relative;
+  color:var(--yellow);
+  font-size:clamp(26px,2.55vw,36px);
+  line-height:1;
+  margin-bottom:clamp(12px,1.45vh,16px);
+}
+.ai-card h3,
+.ai-card p,
+.ai-card .ai-note {
+  position:relative;
+  white-space:nowrap;
+}
+.ai-card h3 {
+  min-height:0;
+  display:block;
+  margin:0 0 clamp(8px,1vh,12px);
+  font-size:clamp(20px,1.95vw,27px);
+  line-height:1.12;
+  color:var(--yellow);
+  -webkit-text-fill-color:unset;
+  background:none;
+}
+.ai-card p {
+  font-size:clamp(15px,1.4vw,19px);
+  line-height:1.24;
+  color:rgba(255,255,255,.9);
+  margin-bottom:clamp(10px,1.2vh,14px);
+}
+.ai-note {
+  display:block;
+  color:rgba(255,255,255,.56);
+  font-size:clamp(13px,1.18vw,16px);
+  line-height:1.2;
+}
+.platform-split {
+  display:grid;
+  grid-template-columns:minmax(330px,.86fr) minmax(640px,1.14fr);
+  align-items:center;
+  gap:clamp(36px,5vw,78px);
+}
+.platform-copy {
+  text-align:left;
+}
+.platform-copy .kicker {
+  font-size:clamp(18px,1.65vw,24px);
+  letter-spacing:.16em;
+  line-height:1.3;
+  margin-bottom:clamp(22px,2.8vh,34px);
+}
+.platform-copy h2 {
+  font-size:clamp(32px,3.6vw,52px);
+  line-height:1.14;
+  letter-spacing:-.03em;
+}
+.platform-copy .tagline {
+  max-width:520px;
+  margin-top:clamp(22px,2.8vh,32px);
+  font-size:clamp(15px,1.35vw,19px);
+  line-height:1.65;
+  color:rgba(255,255,255,.72);
+}
+.platform-formula {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  max-width:520px;
+  margin-top:clamp(24px,3vh,34px);
+}
+.platform-chip,
+.platform-operator {
+  display:inline-flex;
+  align-items:center;
+  min-height:38px;
+  border-radius:999px;
+}
+.platform-chip {
+  border:1px solid rgba(255,255,255,.12);
+  padding:0 16px;
+  color:rgba(255,255,255,.82);
+  background:rgba(0,0,0,.2);
+  font-size:clamp(13px,1.2vw,16px);
+  font-weight:750;
+  white-space:nowrap;
+}
+.platform-chip.result {
+  border-color:rgba(255,198,26,.4);
+  color:var(--yellow);
+  background:rgba(255,198,26,.08);
+}
+.platform-operator {
+  color:var(--yellow);
+  font-size:clamp(18px,1.7vw,24px);
+  font-weight:900;
+  text-shadow:0 0 18px rgba(255,198,26,.3);
+}
+.platform-grid {
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:clamp(16px,2vw,24px);
+}
+.platform-card {
+  min-height:clamp(300px,39vh,380px);
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:clamp(18px,2vw,24px);
+  padding:clamp(26px,3.2vw,40px) clamp(20px,2.4vw,30px);
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.028)),
+    radial-gradient(circle at 50% 0%, rgba(255,198,26,.12), transparent 44%);
+  box-shadow:0 1px 0 rgba(255,255,255,.12) inset, 0 18px 54px rgba(0,0,0,.4);
+  backdrop-filter:blur(22px) saturate(160%);
+}
+.platform-card.featured {
+  border-color:rgba(255,198,26,.42);
+  background:
+    linear-gradient(135deg, rgba(255,198,26,.18), rgba(255,255,255,.04) 58%, rgba(255,198,26,.06));
+  box-shadow:0 1px 0 rgba(255,255,255,.16) inset, 0 22px 66px rgba(255,198,26,.16), 0 18px 54px rgba(0,0,0,.42);
+}
+.platform-label {
+  display:inline-flex;
+  align-items:center;
+  height:28px;
+  padding:0 12px;
+  border-radius:999px;
+  color:#0a0a0a;
+  background:var(--yellow);
+  font-size:clamp(10px,.95vw,12px);
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:clamp(18px,2.2vh,26px);
+}
+.platform-card h3 {
+  min-height:0;
+  display:block;
+  margin:0 0 clamp(12px,1.5vh,18px);
+  font-size:clamp(20px,2vw,28px);
+  line-height:1.15;
+  color:var(--yellow);
+  -webkit-text-fill-color:unset;
+  background:none;
+}
+.platform-card p {
+  font-size:clamp(13px,1.2vw,16px);
+  line-height:1.55;
+  color:rgba(255,255,255,.72);
+  margin-bottom:clamp(18px,2.2vh,26px);
+}
+.platform-list {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.platform-list span {
+  display:block;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  padding:10px 12px;
+  color:rgba(255,255,255,.9);
+  background:rgba(0,0,0,.18);
+  font-size:clamp(12px,1.1vw,15px);
+  font-weight:700;
+  white-space:nowrap;
+}
+
+/* Typography with better spacing */
+.kicker {
+  color:var(--yellow);
+  font-family:"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  font-size:clamp(22px,2.6vw,30px);
+  font-weight:900; letter-spacing:.14em; text-transform:uppercase;
+  margin-bottom:clamp(24px,3vh,36px);
+  opacity:1;
+  position:relative; display:inline-block;
+  text-shadow:0 0 30px rgba(255,198,26,.55), 0 2px 8px rgba(0,0,0,.4);
+}
+h1 {
+  margin:0; font-size:clamp(42px,5.2vw,68px);
+  line-height:1.15; letter-spacing:-.025em; font-weight:800;
+  text-shadow:0 2px 40px rgba(0,0,0,.5);
+}
+h2 {
+  margin:0; font-size:clamp(36px,4.2vw,56px);
+  line-height:1.2; letter-spacing:-.02em; font-weight:750;
+  text-shadow:0 2px 30px rgba(0,0,0,.4);
+}
+h3 {
+  margin:0; font-size:clamp(20px,2vw,28px);
+  line-height:1.35; letter-spacing:-.02em; font-weight:700;
+}
+p {
+  margin:0; color:var(--gray);
+  font-size:clamp(18px,1.8vw,22px);
+  line-height:1.55; letter-spacing:-.01em;
+}
+.small { color:var(--muted); font-size:clamp(14px,1.4vw,17px); line-height:1.6; }
+.yellow { color:var(--yellow); }
+.accent {
+  width:clamp(60px,8vw,80px); height:4px; border-radius:999px;
+  background:linear-gradient(90deg, var(--yellow), var(--yellow-glow));
+  margin:clamp(28px,3.5vh,40px) auto 0;
+  box-shadow:0 0 20px rgba(255,198,26,.5);
+}
+.tagline {
+  font-size:clamp(16px,1.7vw,20px); color:var(--gray);
+  margin-top:clamp(24px,3vh,36px); max-width:clamp(600px,60vw,920px);
+  line-height:1.6; letter-spacing:-.015em; font-weight:400;
+}
+
+/* Premium button */
+.btn {
+  display:inline-flex; align-items:center; gap:12px;
+  padding:clamp(16px,2vh,22px) clamp(32px,4vw,48px);
+  border-radius:999px;
+  background:linear-gradient(135deg, var(--yellow) 0%, var(--yellow-glow) 100%);
+  color:#0a0a0a;
+  font-size:clamp(15px,1.6vw,18px); font-weight:800;
+  letter-spacing:-.015em;
+  border:0; cursor:pointer;
+  text-decoration:none;
+  position:relative; overflow:hidden;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.3) inset,
+    0 8px 24px rgba(255,198,26,.35),
+    0 16px 48px rgba(255,198,26,.2);
+  transition:all .4s cubic-bezier(.22,.61,.36,1);
+}
+.btn:before {
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(255,255,255,.2), transparent 60%);
+  opacity:0; transition:opacity .3s;
+}
+.btn:hover {
+  transform:translateY(-3px) scale(1.02);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.4) inset,
+    0 12px 32px rgba(255,198,26,.45),
+    0 24px 64px rgba(255,198,26,.25);
+}
+.btn:hover:before { opacity:1; }
+
+/* Layout grids */
+.two {
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:clamp(40px,6vw,80px);
+  align-items:center;
+}
+.tc-always-on-layout {
+  transform:translateX(clamp(22px,2.4vw,36px));
+}
+.card-grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:clamp(16px,2vw,24px);
+  margin-top:clamp(40px,5vh,52px);
+}
+.card-grid.three { grid-template-columns:repeat(3,1fr); }
+.card-grid.two { grid-template-columns:repeat(2,1fr); gap:clamp(20px,3vw,32px); }
+
+/* Premium cards with enhanced depth */
+.card {
+  min-height:clamp(180px,22vh,220px);
+  border:1px solid rgba(255,255,255,.11);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.025) 100%);
+  border-radius:clamp(24px,3vw,32px);
+  padding:clamp(36px,4.5vw,48px) clamp(28px,3.5vw,38px);
+  backdrop-filter:blur(32px) saturate(180%);
+  position:relative; overflow:hidden;
+  transition:all .45s cubic-bezier(.22,.61,.36,1);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.08) inset,
+    0 8px 32px rgba(0,0,0,.4),
+    0 2px 8px rgba(0,0,0,.2);
+  text-align:center;
+}
+.card:before {
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,198,26,.08), transparent 70%);
+  opacity:0; transition:opacity .4s;
+}
+.card:after {
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  background:linear-gradient(135deg, rgba(255,255,255,.05) 0%, transparent 50%);
+  opacity:0; transition:opacity .4s;
+}
+.card h3 {
+  font-size:clamp(22px,2.6vw,36px);
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:-.03em;
+  margin-bottom:clamp(14px,1.8vh,20px);
+  background:linear-gradient(135deg, var(--white) 0%, rgba(255,255,255,.85) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  min-height:clamp(48px,6vh,64px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.card p {
+  font-size:clamp(15px,1.6vw,19px);
+  line-height:1.6;
+  color:rgba(180,180,180,.95);
+  letter-spacing:-.01em;
+  font-weight:400;
+}
+.card:hover {
+  transform:translateY(-6px) scale(1.01);
+  border-color:rgba(255,198,26,.22);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.12) inset,
+    0 16px 48px rgba(0,0,0,.5),
+    0 0 0 1px rgba(255,198,26,.12),
+    0 8px 32px rgba(255,198,26,.12);
+}
+.card:hover:before { opacity:1; }
+.card:hover:after { opacity:1; }
+
+/* Enhanced cards for feature-rich sections */
+.card.enhanced {
+  min-height:clamp(200px,24vh,240px);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,.035) 100%);
+  border:1px solid rgba(255,255,255,.16);
+  padding:clamp(38px,4.8vw,50px) clamp(32px,4vw,42px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.12) inset,
+    0 16px 48px rgba(0,0,0,.55),
+    0 2px 6px rgba(0,0,0,.3);
+}
+.card.enhanced h3 {
+  font-size:clamp(24px,2.6vw,34px);
+  margin-bottom:clamp(16px,2vh,22px);
+  font-weight:800;
+}
+.card.enhanced p {
+  font-size:clamp(16px,1.7vw,19px);
+  line-height:1.7;
+  color:#b0b0b0;
+}
+.card.enhanced:hover {
+  transform:translateY(-10px) scale(1.02);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.18) inset,
+    0 24px 64px rgba(0,0,0,.65),
+    0 0 0 1px rgba(255,198,26,.25),
+    0 16px 48px rgba(255,198,26,.2);
+}
+
+/* Icon box with glow */
+.icon-box {
+  width:clamp(44px,5vw,52px); height:clamp(44px,5vw,52px);
+  border-radius:clamp(14px,2vw,18px);
+  border:1px solid rgba(255,198,26,.4);
+  background:
+    linear-gradient(135deg, rgba(255,198,26,.15), rgba(255,198,26,.05));
+  display:grid; place-items:center; color:var(--yellow);
+  margin-bottom:clamp(20px,2.5vh,28px);
+  font-weight:850; font-size:clamp(20px,2.2vw,26px);
+  box-shadow:
+    0 0 24px rgba(255,198,26,.2),
+    0 1px 0 rgba(255,255,255,.1) inset;
+  position:relative;
+}
+.icon-box:before {
+  content:""; position:absolute; inset:-2px;
+  background:linear-gradient(135deg, rgba(255,198,26,.3), transparent);
+  border-radius:inherit; z-index:-1; opacity:0;
+  transition:opacity .3s;
+}
+.card:hover .icon-box:before { opacity:1; }
+
+/* Flow steps with premium style */
+.flow {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:clamp(12px,1.5vw,16px);
+  margin-top:clamp(40px,5vh,60px);
+}
+.step {
+  border:1px solid rgba(255,255,255,.11);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border-radius:clamp(20px,2.5vw,28px);
+  padding:clamp(20px,2.5vw,28px) clamp(16px,2vw,22px);
+  min-height:clamp(140px,18vh,180px);
+  position:relative; overflow:hidden;
+  backdrop-filter:blur(12px);
+  transition:all .4s cubic-bezier(.22,.61,.36,1);
+  box-shadow:0 4px 16px rgba(0,0,0,.3);
+}
+.step:before {
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(circle at 50% 0%, rgba(255,198,26,.08), transparent 70%);
+  opacity:0; transition:opacity .3s;
+}
+.step:hover {
+  transform:translateY(-4px);
+  border-color:rgba(255,198,26,.25);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.4),
+    0 0 0 1px rgba(255,198,26,.1);
+}
+.step:hover:before { opacity:1; }
+.step .num {
+  color:var(--yellow); font-size:clamp(11px,1.2vw,13px);
+  font-weight:900; letter-spacing:.12em;
+  margin-bottom:clamp(16px,2vh,20px);
+  text-shadow:0 0 12px rgba(255,198,26,.5);
+}
+.step h3 { font-size:clamp(18px,2vw,22px); margin-bottom:clamp(8px,1vh,12px); }
+.step p { font-size:clamp(13px,1.4vw,15px); line-height:1.5; color:var(--muted); }
+
+/* Big number with premium effect */
+.big-number {
+  color:var(--yellow);
+  font-size:clamp(120px,18vw,240px);
+  line-height:.8; letter-spacing:-.08em; font-weight:900;
+  background:linear-gradient(135deg, var(--yellow) 0%, var(--yellow-glow) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  filter:drop-shadow(0 0 40px rgba(255,198,26,.3));
+}
+
+/* List with better spacing */
+.list {
+  display:flex; flex-direction:column;
+  gap:clamp(16px,2vh,22px);
+  margin-top:clamp(28px,3.5vh,40px);
+}
+.item {
+  display:flex; gap:clamp(12px,1.5vw,16px); align-items:flex-start;
+  font-size:clamp(18px,1.9vw,21px); color:#d0d0d0; line-height:1.45;
+  letter-spacing:-.012em;
+}
+.item .mark {
+  color:var(--yellow); font-weight:900; min-width:clamp(16px,2vw,20px);
+  text-shadow:0 0 12px rgba(255,198,26,.4);
+}
+
+/* Premium panels */
+.panel {
+  border:1px solid rgba(255,255,255,.12);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.025) 100%);
+  border-radius:clamp(28px,3.5vw,40px);
+  padding:clamp(32px,4vw,48px);
+  min-height:clamp(340px,42vh,440px);
+  position:relative; overflow:hidden;
+  backdrop-filter:blur(24px) saturate(180%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.08) inset,
+    0 12px 40px rgba(0,0,0,.4);
+  transition:all .4s cubic-bezier(.22,.61,.36,1);
+}
+.panel:before {
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+}
+.panel:hover {
+  transform:translateY(-4px);
+  border-color:rgba(255,198,26,.2);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.12) inset,
+    0 16px 48px rgba(0,0,0,.5),
+    0 0 0 1px rgba(255,198,26,.1);
+}
+.panel h3 {
+  margin-bottom:clamp(24px,3vh,32px);
+  font-size:clamp(26px,3vw,36px);
+  letter-spacing:-.025em;
+}
+.compare {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:clamp(20px,3vw,32px);
+  margin-top:clamp(40px,5vh,56px);
+}
+
+.revenue-formula {
+  display:grid;
+  gap:clamp(8px,1vh,12px);
+  margin-top:clamp(18px,2.2vh,26px);
+  color:var(--gray);
+  font-size:clamp(15px,1.55vw,19px);
+  line-height:1.3;
+  font-weight:700;
+}
+.revenue-formula span {
+  display:block;
+}
+.revenue-formula .formula-add {
+  color:var(--yellow);
+  font-size:clamp(18px,1.9vw,24px);
+  font-weight:900;
+}
+.revenue-formula .formula-result {
+  color:var(--white);
+}
+.revenue-formula strong {
+  color:var(--yellow);
+  font-weight:900;
+}
+.features-layout {
+  grid-template-columns:.62fr 1.12fr !important;
+  gap:clamp(18px,2.2vw,30px) !important;
+}
+.features-copy .kicker {
+  font-size:clamp(16px,1.7vw,23px);
+}
+.features-copy h2 {
+  font-size:clamp(22px,2.65vw,36px) !important;
+  line-height:1.2;
+}
+.features-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:clamp(14px,1.8vw,22px) !important;
+  width:100%;
+  max-width:clamp(620px,62vw,820px);
+  justify-self:start;
+}
+.features-grid .card.enhanced {
+  min-height:clamp(158px,18.5vh,198px);
+  padding:clamp(24px,2.7vw,34px) clamp(26px,3vw,38px) !important;
+  border:1.5px solid rgba(255,255,255,.16);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255,198,26,.16), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.105), rgba(255,255,255,.028));
+  box-shadow:0 18px 54px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.12);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  overflow:hidden;
+  position:relative;
+}
+.features-grid .card.enhanced::after {
+  content:"";
+  position:absolute;
+  inset:1px;
+  border-radius:inherit;
+  background:linear-gradient(135deg, rgba(255,255,255,.12), transparent 38%);
+  pointer-events:none;
+  opacity:.55;
+}
+.features-grid .card h3 {
+  width:100%;
+  margin-bottom:clamp(10px,1.2vh,14px);
+  line-height:1.05;
+  white-space:nowrap;
+  font-size:clamp(23px,2.25vw,31px);
+  letter-spacing:0;
+  text-align:left;
+}
+.features-grid .card p {
+  max-width:25ch;
+  margin:0;
+  line-height:1.42;
+  white-space:normal;
+  font-size:clamp(14px,1.32vw,17px);
+  color:rgba(255,255,255,.72);
+  text-wrap:balance;
+  text-align:left;
+}
+.features-grid .card.enhanced > * {
+  position:relative;
+  z-index:1;
+}
+.tc-features-layout {
+  grid-template-columns:.62fr 1.12fr !important;
+  transform:translateX(clamp(18px,2.2vw,34px));
+}
+.tc-safety-layout {
+  grid-template-columns:minmax(260px,.72fr) minmax(420px,.98fr) !important;
+  width:min(100%, 820px);
+  margin:0 auto;
+  transform:none;
+}
+.tc-safety-layout .safety-copy {
+  justify-self:end;
+  max-width:280px;
+}
+.tc-monetization-layout {
+  transform:translateX(clamp(18px,2.2vw,34px));
+}
+.tc-monetization-layout {
+  grid-template-columns:.6fr 1.18fr !important;
+}
+.safety-layout {
+  grid-template-columns:.6fr 1.18fr !important;
+  gap:clamp(18px,2.2vw,30px) !important;
+  align-items:center;
+}
+.safety-copy .kicker {
+  font-size:clamp(16px,1.7vw,23px);
+}
+.safety-copy h2 {
+  font-size:clamp(23px,2.7vw,38px) !important;
+  line-height:1.16;
+}
+.safety-copy .tagline {
+  margin-top:clamp(18px,2.2vh,26px);
+  max-width:25ch;
+  font-size:clamp(16px,1.7vw,22px);
+  line-height:1.35;
+}
+.safety-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:clamp(14px,1.8vw,22px);
+  max-width:clamp(620px,62vw,820px);
+  justify-self:start;
+}
+.tc-safety-layout .safety-grid {
+  width:100%;
+  max-width:clamp(430px,43vw,500px);
+  justify-self:start;
+}
+.safety-grid .card {
+  min-height:clamp(128px,14.5vh,160px);
+  padding:clamp(20px,2.3vw,30px) clamp(24px,2.8vw,36px);
+  border:1.5px solid rgba(255,255,255,.15);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255,198,26,.13), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.095), rgba(255,255,255,.026));
+  box-shadow:0 16px 48px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.11);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.safety-grid .card h3 {
+  margin-bottom:clamp(9px,1vh,12px);
+  font-size:clamp(20px,1.95vw,27px);
+  line-height:1.08;
+  white-space:nowrap;
+}
+.safety-grid .card p {
+  margin:0;
+  max-width:25ch;
+  font-size:clamp(14px,1.32vw,17px);
+  line-height:1.42;
+  color:rgba(255,255,255,.68);
+  text-wrap:balance;
+}
+.monetization-layout {
+  grid-template-columns:.52fr 1.32fr !important;
+  gap:clamp(18px,2.2vw,30px) !important;
+  align-items:center;
+}
+.monetization-layout.tc-monetization-layout {
+  grid-template-columns:.62fr 1.12fr !important;
+}
+.monetization-copy .kicker {
+  font-size:clamp(16px,1.7vw,23px);
+}
+.monetization-copy h2 {
+  font-size:clamp(23px,2.7vw,38px) !important;
+  line-height:1.15;
+}
+.monetization-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:clamp(14px,1.8vw,22px);
+  max-width:clamp(700px,66vw,880px);
+  justify-self:start;
+}
+.tc-monetization-layout .monetization-grid {
+  width:100%;
+  max-width:clamp(620px,62vw,820px);
+}
+.monetization-grid .card {
+  min-height:clamp(122px,13.8vh,154px);
+  padding:clamp(20px,2.3vw,29px) clamp(24px,2.8vw,36px);
+  border:1.5px solid rgba(255,255,255,.145);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255,198,26,.11), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.088), rgba(255,255,255,.024));
+  box-shadow:0 14px 42px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.1);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.monetization-grid .card h3 {
+  margin-bottom:clamp(9px,1vh,12px);
+  font-size:clamp(20px,1.9vw,27px);
+  line-height:1.08;
+  white-space:nowrap;
+}
+.monetization-grid .card p {
+  margin:0;
+  max-width:25ch;
+  font-size:clamp(14px,1.32vw,17px);
+  line-height:1.42;
+  color:rgba(255,255,255,.68);
+  text-wrap:balance;
+}
+.dashboard-layout {
+  grid-template-columns:.56fr 1.24fr !important;
+  gap:clamp(20px,2.4vw,34px) !important;
+  align-items:center;
+}
+.tc-dashboard-layout {
+  grid-template-columns:.62fr 1.12fr !important;
+  transform:translateX(clamp(18px,2.2vw,34px));
+}
+.dashboard-copy .kicker {
+  font-size:clamp(16px,1.7vw,23px);
+}
+.dashboard-copy h2 {
+  font-size:clamp(23px,2.7vw,38px) !important;
+  line-height:1.16;
+}
+.dashboard-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:clamp(12px,1.45vw,18px);
+  max-width:clamp(720px,68vw,940px);
+  justify-self:start;
+}
+.tc-dashboard-layout .dashboard-grid {
+  width:100%;
+  max-width:clamp(620px,62vw,820px);
+}
+.dashboard-grid .card.enhanced {
+  min-height:clamp(108px,12vh,136px);
+  padding:clamp(18px,2vw,25px) clamp(21px,2.3vw,30px) !important;
+  border:1.5px solid rgba(255,255,255,.145);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255,198,26,.12), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.024));
+  box-shadow:0 15px 44px rgba(0,0,0,.33), inset 0 1px 0 rgba(255,255,255,.1);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.dashboard-grid .card h3 {
+  margin-bottom:clamp(6px,.8vh,10px);
+  font-size:clamp(18px,1.65vw,24px);
+  line-height:1.08;
+  white-space:nowrap;
+}
+.dashboard-grid .card p {
+  margin:0;
+  max-width:30ch;
+  font-size:clamp(13px,1.2vw,16px);
+  line-height:1.34;
+  color:rgba(255,255,255,.68);
+  white-space:normal !important;
+  text-wrap:balance;
+}
+.growth-copy-text {
+  margin-top:clamp(20px,2.4vh,30px);
+  max-width:31ch;
+  font-size:clamp(16px,1.62vw,20px);
+  color:var(--gray);
+  line-height:1.4;
+  text-wrap:balance;
+}
+.growth-layout {
+  grid-template-columns:minmax(330px,.88fr) minmax(520px,.98fr) !important;
+  gap:clamp(12px,1.8vw,26px) !important;
+  width:min(100%, 1040px);
+  margin:0 auto;
+}
+.growth-layout > div:first-child {
+  justify-self:end;
+  max-width:420px;
+}
+.growth-layout > div:last-child {
+  justify-self:start;
+}
+.growth-layout h2 {
+  font-size:clamp(38px,4.55vw,60px);
+  line-height:1.08;
+}
+.late-layout {
+  grid-template-columns:.62fr 1.12fr !important;
+  gap:clamp(18px,2.2vw,30px) !important;
+  align-items:center;
+  transform:translateX(clamp(18px,2.2vw,34px));
+}
+.late-copy .kicker {
+  font-size:clamp(16px,1.7vw,23px);
+}
+.late-copy h2 {
+  font-size:clamp(23px,2.7vw,38px) !important;
+  line-height:1.15;
+}
+.late-copy .tagline {
+  margin-top:clamp(18px,2.2vh,26px);
+  max-width:29ch;
+  font-size:clamp(16px,1.65vw,21px);
+  line-height:1.42;
+  text-wrap:balance;
+}
+.late-grid {
+  display:grid;
+  gap:clamp(14px,1.8vw,22px);
+  justify-self:start;
+}
+.late-grid.two-col {
+  grid-template-columns:1fr 1fr;
+  width:100%;
+  max-width:clamp(620px,62vw,820px);
+}
+.comparison-grid {
+  max-width:clamp(700px,66vw,900px);
+}
+.comparison-grid .late-card {
+  min-height:clamp(300px,34vh,390px);
+  padding:clamp(28px,3vw,42px);
+}
+.comparison-grid .late-card h3 {
+  font-size:clamp(22px,2.15vw,30px);
+}
+.comparison-grid .late-card .item {
+  font-size:clamp(15px,1.42vw,18px);
+}
+.late-grid.one-col {
+  grid-template-columns:1fr;
+  width:100%;
+  max-width:clamp(520px,46vw,660px);
+}
+.late-card {
+  border:1.5px solid rgba(255,255,255,.145);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255,198,26,.12), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.024));
+  border-radius:clamp(18px,2vw,24px);
+  padding:clamp(22px,2.4vw,32px);
+  box-shadow:0 16px 48px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.1);
+}
+.late-card h3 {
+  margin-bottom:clamp(12px,1.4vh,18px);
+  font-size:clamp(20px,1.9vw,27px);
+  line-height:1.1;
+}
+.late-card p,
+.late-card .item {
+  font-size:clamp(14px,1.32vw,17px);
+  line-height:1.42;
+}
+.late-card .list {
+  display:grid;
+  gap:clamp(9px,1.1vh,13px);
+}
+.late-stack {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:clamp(18px,2.2vh,26px);
+  justify-self:start;
+  width:100%;
+  max-width:clamp(680px,62vw,840px);
+}
+.late-mini-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:clamp(10px,1.2vw,16px);
+}
+.late-mini {
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.045);
+  border-radius:clamp(12px,1.4vw,16px);
+  padding:clamp(14px,1.5vw,20px);
+  text-align:center;
+}
+.late-mini strong {
+  display:block;
+  font-size:clamp(14px,1.35vw,17px);
+  line-height:1.25;
+}
+.late-mini span {
+  display:block;
+  margin-top:clamp(5px,.6vh,8px);
+  color:rgba(255,255,255,.66);
+  font-size:clamp(12px,1.1vw,14px);
+  line-height:1.3;
+}
+.late-stat {
+  text-align:center;
+}
+.late-stat .number {
+  font-size:clamp(46px,5vw,68px);
+  font-weight:900;
+  color:var(--yellow);
+  margin-bottom:clamp(12px,1.5vh,18px);
+  text-shadow:0 0 30px rgba(255,198,26,.35);
+}
+.cta-layout {
+  grid-template-columns:.76fr .96fr !important;
+  gap:clamp(74px,6.5vw,96px) !important;
+  align-items:center;
+  transform:translateX(clamp(24px,2.8vw,42px));
+}
+.cta-copy {
+  max-width:clamp(390px,36vw,500px);
+  justify-self:end;
+}
+.cta-copy .kicker {
+  font-size:clamp(24px,2.45vw,34px);
+  line-height:1.12;
+  letter-spacing:.08em;
+  max-width:17ch;
+}
+.cta-copy p {
+  margin-top:clamp(18px,2.1vh,28px);
+  max-width:30ch;
+  font-size:clamp(17px,1.72vw,22px);
+  line-height:1.35;
+  color:rgba(255,255,255,.74);
+  text-wrap:balance;
+}
+.cta-copy p span {
+  display:block;
+  margin-top:clamp(5px,.65vh,8px);
+}
+.cta-copy p span:first-child {
+  margin-top:0;
+}
+.cta-panel {
+  justify-self:start;
+  width:100%;
+  max-width:clamp(470px,42vw,580px);
+  border:1.5px solid rgba(255,255,255,.16);
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255,198,26,.12), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.085), rgba(255,255,255,.022));
+  border-radius:clamp(20px,2.2vw,26px);
+  padding:clamp(32px,3.6vw,46px);
+  box-shadow:0 18px 56px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.045) inset,inset 0 1px 0 rgba(255,255,255,.12);
+  position:relative;
+  overflow:hidden;
+}
+.cta-panel:before {
+  content:"";
+  position:absolute;
+  inset:1px;
+  border-radius:inherit;
+  background:linear-gradient(135deg, rgba(255,255,255,.11), transparent 42%);
+  pointer-events:none;
+  opacity:.6;
+}
+.cta-panel > * {
+  position:relative;
+  z-index:1;
+}
+.cta-panel h2 {
+  font-size:clamp(31px,3.45vw,48px);
+  line-height:1.12;
+  margin-bottom:clamp(24px,3vh,36px);
+}
+.cta-links {
+  display:grid;
+  gap:clamp(12px,1.5vh,18px);
+  padding-top:clamp(18px,2.2vh,28px);
+  border-top:1px solid rgba(255,255,255,.12);
+}
+.cta-links a,
+.cta-links div {
+  color:var(--yellow);
+  font-size:clamp(20px,2.05vw,27px);
+  font-weight:850;
+  text-decoration:none;
+  text-shadow:0 0 22px rgba(255,198,26,.28);
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  line-height:1.25;
+}
+.roi-layout {
+  grid-template-columns:.72fr 1.28fr;
+}
+.roi-copy .kicker {
+  font-size:clamp(16px,1.7vw,23px);
+}
+.roi-copy h2 {
+  font-size:clamp(26px,3vw,42px);
+}
+.roi-copy .list {
+  gap:clamp(12px,1.5vh,17px);
+}
+.roi-copy .item {
+  font-size:clamp(16px,1.65vw,19px);
+}
+.roi-note {
+  margin-top:clamp(28px,3.5vh,42px) !important;
+  font-size:clamp(17px,1.85vw,22px) !important;
+}
+.roi-compare {
+  gap:clamp(18px,2.5vw,28px);
+  margin-top:0;
+}
+.roi-compare .panel {
+  min-height:clamp(280px,34vh,380px);
+  padding:clamp(30px,3.8vw,44px);
+  border-radius:clamp(24px,3vw,34px);
+}
+.roi-compare .panel h3 {
+  font-size:clamp(26px,2.8vw,36px) !important;
+  margin-bottom:clamp(18px,2.2vh,26px) !important;
+  line-height:1.08 !important;
+  white-space:nowrap;
+}
+.roi-compare .panel p {
+  font-size:clamp(18px,2vw,24px) !important;
+  line-height:1.42 !important;
+}
+.advantages-layout {
+  display:grid;
+  grid-template-columns:minmax(240px,.62fr) minmax(0,1.38fr);
+  gap:clamp(32px,5vw,72px);
+  align-items:center;
+  width:100%;
+}
+.advantages-copy {
+  text-align:left;
+}
+.advantages-copy .kicker {
+  font-size:clamp(15px,1.45vw,21px);
+  letter-spacing:.16em;
+}
+.advantages-copy h2 {
+  font-size:clamp(30px,3.5vw,48px);
+  line-height:1.24;
+}
+.advantages-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:clamp(14px,2vw,22px);
+}
+.advantages-grid .card {
+  min-height:clamp(130px,16vh,170px);
+  padding:clamp(22px,2.8vw,30px) clamp(20px,2.5vw,28px);
+}
+.advantages-grid .card h3 {
+  font-size:clamp(18px,1.9vw,25px) !important;
+  margin-bottom:clamp(9px,1.2vh,13px) !important;
+  white-space:nowrap;
+}
+.advantages-grid .card p {
+  font-size:clamp(14px,1.45vw,17px) !important;
+  white-space:nowrap;
+}
+.vision-layout {
+  display:grid;
+  grid-template-columns:minmax(280px,.76fr) minmax(0,1.24fr);
+  gap:clamp(32px,5vw,72px);
+  align-items:center;
+  width:100%;
+}
+.vision-copy {
+  text-align:left;
+}
+.vision-copy .kicker {
+  font-size:clamp(18px,1.8vw,26px);
+  letter-spacing:.18em;
+}
+.vision-copy h2 {
+  font-size:clamp(24px,2.55vw,38px);
+  line-height:1.18;
+  max-width:720px;
+}
+.vision-copy h2 .title-line {
+  display:block;
+  white-space:nowrap;
+}
+.vision-steps {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:clamp(18px,2.5vh,28px);
+}
+.vision-steps .step {
+  min-height:auto;
+  padding:clamp(28px,3.4vw,38px) clamp(28px,3.5vw,42px);
+}
+.vision-steps .step h3 {
+  font-size:clamp(22px,2.4vw,30px);
+}
+.vision-steps .step p {
+  font-size:clamp(15px,1.5vw,18px);
+}
+.tech-layout {
+  display:grid;
+  grid-template-columns:minmax(300px,.72fr) minmax(0,1.28fr);
+  gap:clamp(30px,5vw,70px);
+  align-items:center;
+  width:100%;
+}
+.tech-copy {
+  text-align:left;
+}
+.tech-copy .kicker {
+  font-size:clamp(17px,1.75vw,25px);
+  line-height:1.22;
+  letter-spacing:.12em;
+}
+.tech-copy .kicker span {
+  display:block;
+}
+.tech-copy h2 {
+  font-size:clamp(26px,2.75vw,40px);
+  line-height:1.16;
+  max-width:620px;
+}
+.tech-stack {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:clamp(22px,3vh,34px);
+}
+.tech-section-title {
+  color:var(--yellow);
+  font-size:clamp(18px,2vw,24px);
+  margin-bottom:clamp(16px,2vh,24px);
+  text-align:left;
+  letter-spacing:.04em;
+}
+.tech-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:clamp(12px,1.6vw,18px);
+}
+.tech-tile {
+  border:1.5px solid rgba(255,255,255,.18);
+  background:linear-gradient(135deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.02) 100%);
+  border-radius:clamp(14px,1.8vw,18px);
+  padding:clamp(18px,2.2vw,26px);
+  backdrop-filter:blur(32px);
+  box-shadow:0 12px 48px rgba(0,0,0,.5);
+  text-align:center;
+}
+.tech-tile.highlight {
+  border-color:rgba(255,198,26,.35);
+  background:linear-gradient(135deg, rgba(255,198,26,.12) 0%, rgba(255,198,26,.03) 100%);
+  box-shadow:0 16px 56px rgba(255,198,26,.15),0 0 0 1px rgba(255,198,26,.1) inset;
+}
+.tech-icon {
+  width:clamp(38px,4.4vw,46px);
+  height:clamp(38px,4.4vw,46px);
+  border-radius:10px;
+  background:linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+  border:1.5px solid rgba(255,255,255,.2);
+  display:grid;
+  place-items:center;
+  margin:0 auto clamp(10px,1.3vh,14px);
+  font-size:clamp(18px,2.2vw,24px);
+}
+.tech-tile.highlight .tech-icon {
+  background:linear-gradient(135deg, rgba(255,198,26,.25), rgba(255,198,26,.1));
+  border-color:rgba(255,198,26,.5);
+  color:var(--yellow);
+  box-shadow:0 0 32px rgba(255,198,26,.25);
+}
+.tech-tile h4 {
+  font-size:clamp(14px,1.5vw,18px);
+  font-weight:800;
+  margin:0 0 clamp(4px,.6vh,6px);
+  line-height:1.3;
+}
+.tech-tile p {
+  font-size:clamp(12px,1.25vw,14px);
+  color:#b0b0b0;
+  line-height:1.4;
+}
+.expertise-layout {
+  display:grid;
+  grid-template-columns:minmax(260px,.62fr) minmax(0,1.38fr);
+  gap:clamp(30px,5vw,70px);
+  align-items:center;
+  width:100%;
+}
+.expertise-copy {
+  text-align:left;
+}
+.expertise-copy .kicker {
+  font-size:clamp(17px,1.8vw,25px);
+  letter-spacing:.12em;
+}
+.expertise-copy h2 {
+  font-size:clamp(24px,2.55vw,38px);
+  line-height:1.16;
+  max-width:720px;
+}
+.expertise-copy h2 .title-line {
+  display:block;
+  white-space:nowrap;
+}
+.expertise-stack {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:clamp(24px,3vh,36px);
+}
+.expertise-stats {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:clamp(18px,2.5vw,30px);
+}
+.expertise-stat {
+  border:1px solid rgba(255,198,26,.3);
+  background:linear-gradient(135deg, rgba(255,198,26,.08) 0%, rgba(255,198,26,.02) 100%);
+  border-radius:clamp(22px,2.8vw,30px);
+  padding:clamp(28px,3.4vw,42px);
+  text-align:center;
+}
+.expertise-number {
+  font-size:clamp(48px,5.8vw,72px);
+  font-weight:900;
+  color:var(--yellow);
+  margin-bottom:clamp(14px,1.8vh,22px);
+  text-shadow:0 0 30px rgba(255,198,26,.4);
+}
+.expertise-stat p {
+  font-size:clamp(15px,1.55vw,19px);
+  line-height:1.55;
+}
+.expertise-points {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:clamp(14px,2vh,22px);
+}
+.expertise-points .item {
+  font-size:clamp(20px,2.15vw,27px);
+  font-weight:700;
+}
+.contact-layout {
+  display:grid;
+  grid-template-columns:minmax(300px,.9fr) minmax(0,1.1fr);
+  gap:clamp(36px,5vw,76px);
+  align-items:center;
+  width:100%;
+}
+.contact-copy {
+  text-align:left;
+}
+.contact-copy .kicker {
+  font-size:clamp(18px,1.9vw,28px);
+  letter-spacing:.18em;
+}
+.contact-copy .tagline {
+  font-size:clamp(21px,2.15vw,28px);
+  max-width:620px;
+  line-height:1.34;
+  margin-top:clamp(28px,3.5vh,42px);
+}
+.contact-copy .tagline span {
+  display:block;
+}
+.contact-copy .tagline span + span {
+  margin-top:clamp(8px,1vh,12px);
+}
+.contact-copy .tagline .phrase-gap {
+  margin-top:clamp(22px,3vh,34px);
+}
+.contact-copy .tagline strong {
+  color:var(--white);
+  font-weight:850;
+}
+.contact-card {
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,198,26,.36);
+  background:
+    radial-gradient(circle at 85% 12%, rgba(255,198,26,.18), transparent 36%),
+    linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.035));
+  border-radius:clamp(28px,3.4vw,38px);
+  padding:clamp(42px,5vw,64px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.14) inset,
+    0 24px 70px rgba(0,0,0,.55),
+    0 0 0 1px rgba(255,198,26,.12),
+    0 18px 58px rgba(255,198,26,.14);
+  backdrop-filter:blur(28px) saturate(180%);
+}
+.contact-card:before {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(115deg, rgba(255,255,255,.16), transparent 42%);
+  opacity:.55;
+}
+.contact-card > * {
+  position:relative;
+  z-index:1;
+}
+.contact-card h2 {
+  font-size:clamp(38px,4.6vw,66px);
+  line-height:1.2;
+  margin-bottom:clamp(38px,5vh,58px);
+}
+.contact-links {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:clamp(18px,2.4vh,26px);
+}
+.contact-link {
+  display:block;
+  border:1px solid rgba(255,255,255,.13);
+  background:linear-gradient(135deg, rgba(0,0,0,.24), rgba(255,255,255,.04));
+  border-radius:clamp(18px,2.2vw,24px);
+  padding:clamp(20px,2.5vw,28px);
+  color:var(--yellow);
+  text-decoration:none;
+  font-size:clamp(21px,2.3vw,30px);
+  font-weight:850;
+  text-shadow:0 0 20px rgba(255,198,26,.28);
+}
+
+/* Responsive */
+@media(max-width:1024px){
+  .slide { min-height:900px; }
+  .two, .compare, .content.hero-split, .reality-split, .bottleneck-split, .ai-split, .platform-split { grid-template-columns:1fr; gap:clamp(32px,5vh,48px); }
+  .card-grid, .flow { grid-template-columns:1fr 1fr; }
+  .hero-copy-left,
+  .hero-copy-right,
+  .reality-copy,
+  .bottleneck-copy,
+  .ai-copy,
+  .platform-copy { text-align:center; }
+  .hero-copy-left .tagline { margin-left:auto; margin-right:auto; }
+  .hero-copy-left .hero-rule { margin-left:auto; margin-right:auto; }
+  .reality-copy .tagline { margin-left:auto; margin-right:auto; white-space:normal; }
+  .reality-list { justify-self:center; }
+  .bottleneck-copy h2 { white-space:normal; }
+  .ai-copy .tagline { margin-left:auto; margin-right:auto; }
+  .platform-copy .tagline { margin-left:auto; margin-right:auto; }
+  .platform-formula { justify-content:center; margin-left:auto; margin-right:auto; }
+}
+@media(max-width:640px){
+  .card-grid, .flow, .bottleneck-grid, .ai-grid, .platform-grid { grid-template-columns:1fr; }
+  .wordmark { font-size:24px; left:24px; top:28px; }
+  .hero-title-card strong { font-size:clamp(28px,8vw,34px); }
+  .hero-title-card { padding:32px 24px; }
+  .hero-title-card.zh-featured strong { font-size:clamp(34px,10vw,42px); }
+  .hero-title-meta { grid-template-columns:1fr; }
+  .reality-item { align-items:flex-start; flex-direction:column; }
+  .reality-item p { text-align:left; }
+}
+
+/* Prevent flash during language switch */
+body.restoring-scroll {
+  visibility: hidden;
+}
+</style>
+
+<script>
+// Restore scroll position IMMEDIATELY before page renders
+(function() {
+  try {
+    const savedSlide = sessionStorage.getItem('slidePosition');
+    if (savedSlide !== null) {
+      // Hide body during restoration to prevent flash
+      document.documentElement.classList.add('restoring-scroll');
+
+      window.addEventListener('DOMContentLoaded', function() {
+        const slideHeight = window.innerHeight;
+        window.scrollTo(0, parseInt(savedSlide) * slideHeight);
+        sessionStorage.removeItem('slidePosition');
+
+        // Show content after scrolling
+        requestAnimationFrame(function() {
+          document.documentElement.classList.remove('restoring-scroll');
+        });
+      });
+    }
+  } catch(err) {}
+})();
+</script>
+
+</head>
+<body>
+
+<script>
+// Restore scroll position IMMEDIATELY when body starts loading
+(function() {
+  try {
+    const savedSlide = sessionStorage.getItem('slidePosition');
+    if (savedSlide !== null) {
+      const slideHeight = window.innerHeight;
+      window.scrollTo(0, parseInt(savedSlide) * slideHeight);
+      sessionStorage.removeItem('slidePosition');
+      document.documentElement.classList.remove('restoring-scroll');
+    }
+  } catch(err) {}
+})();
+</script>
+
+<div class="wordmark">iFanzy</div>
+
+<div class="lang-switcher">
+<a href="creator_recruitment_mobile.html" class="lang-btn">EN</a>
+<a href="creator_recruitment_tc_mobile.html" class="lang-btn active">繁中</a>
+</div>
+
+<!-- Slide 1: Hero -->
+<section class="slide">
+<div class="content hero-split">
+<div class="hero-copy-left">
+<div class="kicker">創作者變現</div>
+<p class="tagline">
+您的粉絲自動變成營收—24 / 7全天候
+</p>
+<div class="hero-rule"></div>
+</div>
+<div class="hero-copy-right">
+<div class="hero-title-stack">
+<div class="hero-title-card featured zh-featured">
+<strong><span>接入社交平台</span><span>AI全面變現</span><span class="yellow">坐享其成</span></strong>
+<div class="hero-title-meta">
+<span>24 / 7 自動營收</span>
+<span>零額外工作</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 2: 24小時困境 -->
+<section class="slide">
+<div class="content">
+<div class="reality-split">
+<div class="reality-copy">
+<div class="kicker">您的現實</div>
+<h2>永不停歇<br/><span class="yellow">永不滿足</span></h2>
+<p class="tagline">
+數百萬粉絲 零休息時間 您停下來 營收就停
+</p>
+</div>
+<div class="reality-list">
+<div class="reality-item">
+<h3>早上6點</h3>
+<p>創作內容</p>
+</div>
+<div class="reality-item">
+<h3>上午10點</h3>
+<p>回覆私訊</p>
+</div>
+<div class="reality-item">
+<h3>下午2點</h3>
+<p>開會</p>
+</div>
+<div class="reality-item">
+<h3>晚上6點</h3>
+<p>與粉絲互動</p>
+</div>
+<div class="reality-item">
+<h3>晚上10點</h3>
+<p>直播</p>
+</div>
+<div class="reality-item">
+<h3>凌晨2點</h3>
+<p>全球時區</p>
+</div>
+<div class="reality-item">
+<h3>早上6點</h3>
+<p>循環往復</p>
+</div>
+<div class="reality-item highlight">
+<h3>過勞</h3>
+<p>撐不下去了</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 3: 瓶頸問題 -->
+<section class="slide">
+<div class="content">
+<div class="bottleneck-split">
+<div class="bottleneck-copy">
+<div class="kicker">瓶頸所在</div>
+<h2>24小時 × 24時區 × <span class="yellow">∞ 粉絲</span></h2>
+</div>
+<div class="bottleneck-grid">
+
+<div class="bottleneck-card">
+<div class="bottleneck-number">24</div>
+<h3>一天只有24小時</h3>
+<p>您無法永遠工作</p>
+</div>
+
+<div class="bottleneck-card">
+<div class="bottleneck-number">24</div>
+<h3>全球24個時區</h3>
+<p>您睡覺時粉絲正醒著</p>
+</div>
+
+<div class="bottleneck-card">
+<div class="bottleneck-number">∞</div>
+<h3>等待中的粉絲</h3>
+<p>您正在錯失的營收</p>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- Slide 4: AI不取代你 -->
+<section class="slide">
+<div class="content">
+<div class="ai-split">
+<div class="ai-copy">
+<div class="kicker">AI 為您工作</div>
+<h2>AI 增強，而非<span class="yellow">取代</span></h2>
+<p class="tagline">您專注創作，AI 為您處理一切繁瑣工作</p>
+</div>
+<div class="ai-grid">
+<div class="ai-card">
+<div class="ai-icon">⏰</div>
+<h3>時間自由</h3>
+<p>您在創作時 AI 在工作</p>
+<span class="ai-note">您睡覺，AI 在賺錢</span>
+</div>
+<div class="ai-card">
+<div class="ai-icon">🌍</div>
+<h3>全球覆蓋</h3>
+<p>24 時區同時在線</p>
+<span class="ai-note">全球粉絲持續互動</span>
+</div>
+<div class="ai-card">
+<div class="ai-icon">💰</div>
+<h3>收入倍增</h3>
+<p>永不停歇的變現機器</p>
+<span class="ai-note">24 / 7 自動銷售</span>
+</div>
+<div class="ai-card">
+<div class="ai-icon">∞</div>
+<h3>規模化互動</h3>
+<p>一對無限的粉絲關係</p>
+<span class="ai-note">每個粉絲都被照顧</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 5: 額外收入渠道 -->
+<section class="slide">
+<div class="content">
+<div class="two" style="grid-template-columns:.55fr 1.45fr;gap:clamp(28px,3.5vw,48px);align-items:center">
+
+  <!-- 左側：文字 -->
+  <div>
+    <div class="kicker">與現有平台共存</div>
+    <h2 style="font-size:clamp(24px,3vw,40px)">額外收入渠道<br/>而非<span class="yellow">平台替代</span></h2>
+    <p class="revenue-formula">
+    <span>現有平台保持不變</span>
+    <span class="formula-add">+ 增加 iFanzy</span>
+    <span class="formula-result">= <strong>雙倍收入</strong>，零額外工作</span>
+    </p>
+  </div>
+
+  <!-- 右側：3個模塊 -->
+  <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:clamp(16px,2vw,28px);align-items:stretch">
+
+  <!-- 現有平台保持不變 -->
+  <div style="background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1.5px solid rgba(255,255,255,.15);border-radius:clamp(20px,2.4vw,28px);padding:clamp(30px,3.6vw,44px);backdrop-filter:blur(20px);box-shadow:0 16px 64px rgba(0,0,0,.4)">
+    <h3 style="font-size:clamp(19px,2.1vw,26px);margin-bottom:clamp(13px,1.6vh,18px);text-align:center;color:rgba(255,255,255,.95)">現有平台</h3>
+    <div style="font-size:clamp(13px,1.4vw,16px);color:var(--yellow);margin-bottom:clamp(14px,1.8vh,20px);text-align:center;font-weight:700">保持不變</div>
+    <div style="display:flex;flex-direction:column;gap:clamp(10px,1.2vh,14px)">
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:clamp(10px,1.2vw,14px);padding:clamp(11px,1.3vw,15px);text-align:center">
+        <div style="font-size:clamp(14px,1.6vw,18px);font-weight:700;color:rgba(255,255,255,.9)">OnlyFans</div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:clamp(10px,1.2vw,14px);padding:clamp(11px,1.3vw,15px);text-align:center">
+        <div style="font-size:clamp(14px,1.6vw,18px);font-weight:700;color:rgba(255,255,255,.9)">Patreon</div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:clamp(10px,1.2vw,14px);padding:clamp(11px,1.3vw,15px);text-align:center">
+        <div style="font-size:clamp(14px,1.6vw,18px);font-weight:700;color:rgba(255,255,255,.9)">Fanvue</div>
+      </div>
+    </div>
+    <div style="margin-top:clamp(14px,1.8vh,20px);padding-top:clamp(14px,1.8vh,20px);border-top:1px solid rgba(255,255,255,.08)">
+      <div style="font-size:clamp(12px,1.3vw,15px);color:#999;line-height:1.6;text-align:center">繼續運營<br/>收入不變</div>
+    </div>
+  </div>
+
+  <!-- 加號 -->
+  <div style="font-size:clamp(30px,3.8vw,46px);font-weight:900;color:var(--yellow);text-shadow:0 0 30px rgba(255,198,26,.5);line-height:1;align-self:center">+</div>
+
+  <!-- 增加 iFanzy -->
+  <div style="background:linear-gradient(135deg,rgba(255,198,26,.16),rgba(255,198,26,.05));border:2px solid rgba(255,198,26,.45);border-radius:clamp(20px,2.4vw,28px);padding:clamp(30px,3.6vw,44px);backdrop-filter:blur(20px);box-shadow:0 20px 72px rgba(255,198,26,.25),0 0 0 1px rgba(255,198,26,.2) inset;position:relative">
+    <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--yellow);color:#000;font-size:clamp(10px,1.1vw,13px);font-weight:800;padding:clamp(5px,.7vw,7px) clamp(11px,1.5vw,15px);border-radius:clamp(11px,1.3vw,14px);letter-spacing:.08em;box-shadow:0 4px 16px rgba(255,198,26,.4);white-space:nowrap">新渠道</div>
+    <h3 style="font-size:clamp(19px,2.1vw,26px);margin-bottom:clamp(13px,1.6vh,18px);margin-top:clamp(6px,.8vh,10px);text-align:center;color:var(--yellow)">iFanzy</h3>
+    <div style="font-size:clamp(13px,1.4vw,16px);color:var(--yellow);margin-bottom:clamp(14px,1.8vh,20px);text-align:center;font-weight:700;opacity:.9">AI 全自動化</div>
+    <div style="display:flex;flex-direction:column;gap:clamp(12px,1.4vh,16px)">
+      <div style="display:flex;align-items:center;gap:clamp(8px,1vw,12px)">
+        <div style="font-size:clamp(18px,2.2vw,26px);line-height:1">🤖</div>
+        <div style="font-size:clamp(14px,1.6vw,18px);font-weight:700;color:rgba(255,255,255,.95)">AI 自動聊天</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:clamp(8px,1vw,12px)">
+        <div style="font-size:clamp(18px,2.2vw,26px);line-height:1">📹</div>
+        <div style="font-size:clamp(14px,1.6vw,18px);font-weight:700;color:rgba(255,255,255,.95)">AI 自動直播</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:clamp(8px,1vw,12px)">
+        <div style="font-size:clamp(18px,2.2vw,26px);line-height:1">💰</div>
+        <div style="font-size:clamp(14px,1.6vw,18px);font-weight:700;color:rgba(255,255,255,.95)">AI 自動變現</div>
+      </div>
+    </div>
+    <div style="margin-top:clamp(14px,1.8vh,20px);padding-top:clamp(14px,1.8vh,20px);border-top:1px solid rgba(255,198,26,.2)">
+      <div style="font-size:clamp(12px,1.3vw,15px);color:var(--yellow);line-height:1.6;text-align:center;font-weight:700">零人工介入<br/>純額外收入</div>
+    </div>
+  </div>
+
+  <!-- 等號 -->
+  <div style="font-size:clamp(30px,3.8vw,46px);font-weight:900;color:var(--yellow);text-shadow:0 0 30px rgba(255,198,26,.5);line-height:1;align-self:center">=</div>
+
+  <!-- 雙倍收入 -->
+  <div style="background:linear-gradient(135deg,rgba(255,198,26,.12),rgba(255,198,26,.03));border:1.5px solid rgba(255,198,26,.3);border-radius:clamp(20px,2.4vw,28px);padding:clamp(30px,3.6vw,44px);backdrop-filter:blur(20px);box-shadow:0 16px 64px rgba(255,198,26,.15)">
+    <h3 style="font-size:clamp(19px,2.1vw,26px);margin-bottom:clamp(13px,1.6vh,18px);text-align:center;color:var(--yellow)">結果</h3>
+    <div style="text-align:center;margin-bottom:clamp(16px,2vh,22px)">
+      <div style="font-size:clamp(30px,3.6vw,46px);font-weight:900;color:var(--yellow);line-height:1;margin-bottom:clamp(8px,1vh,12px);text-shadow:0 0 30px rgba(255,198,26,.4)">2×</div>
+      <div style="font-size:clamp(15px,1.7vw,19px);font-weight:800;color:rgba(255,255,255,.95);line-height:1.4">雙倍收入</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:clamp(10px,1.2vh,14px)">
+      <div style="display:flex;align-items:center;gap:clamp(8px,1vw,12px)">
+        <div style="color:var(--yellow);font-size:clamp(14px,1.6vw,18px);line-height:1">✓</div>
+        <div style="font-size:clamp(12px,1.4vw,16px);color:#b0b0b0">額外渠道</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:clamp(8px,1vw,12px)">
+        <div style="color:var(--yellow);font-size:clamp(14px,1.6vw,18px);line-height:1">✓</div>
+        <div style="font-size:clamp(12px,1.4vw,16px);color:#b0b0b0">零額外時間</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:clamp(8px,1vw,12px)">
+        <div style="color:var(--yellow);font-size:clamp(14px,1.6vw,18px);line-height:1">✓</div>
+        <div style="font-size:clamp(12px,1.4vw,16px);color:#b0b0b0">疊加收益</div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+</div>
+</div>
+</section>
+
+<!-- Slide 6: 3步流程 -->
+<section class="slide">
+<div class="content">
+<div class="two">
+<div style="text-align:center">
+<div class="big-number">3</div>
+<p style="margin-top:clamp(24px,3vh,36px);font-size:clamp(20px,2.4vw,28px);color:var(--yellow);font-weight:700;letter-spacing:-.015em">
+三步立即開始賺錢
+</p>
+</div>
+<div>
+<div class="kicker">如何運作</div>
+<h2>只需<span class="yellow">三步</span><br/>立即開始賺錢</h2>
+<div style="margin-top:clamp(36px,4.5vh,52px);display:grid;gap:clamp(24px,3vh,32px)">
+
+<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,2.5vw,28px);align-items:start">
+<div style="width:clamp(48px,5.5vw,60px);height:clamp(48px,5.5vw,60px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(20px,2.4vw,28px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">1</div>
+<div style="text-align:left">
+<h3 style="font-size:clamp(20px,2.2vw,26px);margin-bottom:clamp(8px,1vh,12px);font-weight:800">驗證身份</h3>
+<p style="font-size:clamp(15px,1.6vw,18px);color:rgba(180,180,180,.95);line-height:1.55">掃描臉部確認身份——只有真實的您能創建AI分身，杜絕冒充。</p>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,2.5vw,28px);align-items:start">
+<div style="width:clamp(48px,5.5vw,60px);height:clamp(48px,5.5vw,60px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(20px,2.4vw,28px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">2</div>
+<div style="text-align:left">
+<h3 style="font-size:clamp(20px,2.2vw,26px);margin-bottom:clamp(8px,1vh,12px);font-weight:800">訓練您的AI</h3>
+<p style="font-size:clamp(15px,1.6vw,18px);color:rgba(180,180,180,.95);line-height:1.55">上傳內容設定個性——AI學會像您一樣說話、互動。</p>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,2.5vw,28px);align-items:start">
+<div style="width:clamp(48px,5.5vw,60px);height:clamp(48px,5.5vw,60px);border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--yellow-glow));display:flex;align-items:center;justify-content:center;font-size:clamp(20px,2.4vw,28px);font-weight:900;color:#0a0a0a;flex-shrink:0;box-shadow:0 8px 24px rgba(255,198,26,.35)">3</div>
+<div style="text-align:left">
+<h3 style="font-size:clamp(20px,2.2vw,26px);margin-bottom:clamp(8px,1vh,12px);font-weight:800;color:var(--yellow)">全天候賺錢</h3>
+<p style="font-size:clamp(15px,1.6vw,18px);color:rgba(180,180,180,.95);line-height:1.55">上線即開始——24 / 7直播、互動、營收，睡覺時也在賺。</p>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 6: 24 / 7工作 -->
+<section class="slide">
+<div class="content">
+<div class="two tc-always-on-layout">
+<div style="text-align:center">
+<div class="big-number">24 / 7</div>
+<p style="margin-top:clamp(24px,3vh,36px);font-size:clamp(20px,2.4vw,28px);color:var(--yellow);font-weight:700;letter-spacing:-.015em">
+永不睡覺，永不停歇
+</p>
+</div>
+<div>
+<div class="kicker">全天候在線</div>
+<h2>您的AI分身<br/><span class="yellow">無需停歇</span></h2>
+<div class="list">
+<div class="item"><span class="mark">→</span> 您睡覺時與粉絲聊天</div>
+<div class="item"><span class="mark">→</span> 跨所有時區直播</div>
+<div class="item"><span class="mark">→</span> 即時回覆每條訊息</div>
+<div class="item"><span class="mark">→</span> 24 / 7自動銷售內容</div>
+<div class="item"><span class="mark">→</span> 在粉絲最活躍時互動</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 7: AI功能 -->
+<section class="slide">
+<div class="content">
+<div class="two features-layout tc-features-layout" style="align-items:center">
+<div class="features-copy">
+<div class="kicker">AI功能</div>
+<h2>您的AI分身<br/><span class="yellow">能做什麼</span></h2>
+</div>
+<div class="features-grid">
+<div class="card enhanced" data-index="01">
+<h3>AI聊天</h3>
+<p>同時與數千粉絲進行自然對話</p>
+</div>
+<div class="card enhanced" data-index="02">
+<h3>AI直播</h3>
+<p>24 / 7全天候直播，即時互動和參與</p>
+</div>
+<div class="card enhanced" data-index="03">
+<h3>AI銷售</h3>
+<p>推薦和銷售您的內容、訂閱和產品</p>
+</div>
+<div class="card enhanced" data-index="04">
+<h3>AI互動</h3>
+<p>通過個性化互動建立粉絲關係</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 8: 安全控制 -->
+<section class="slide">
+<div class="content">
+<div class="two safety-layout tc-safety-layout">
+<div class="safety-copy">
+<div class="kicker">您掌控一切</div>
+<h2>安全與控制<br/><span class="yellow">雙重保障</span></h2>
+<p class="tagline">
+您的AI始終在您設定的規則內運作
+</p>
+</div>
+<div class="safety-grid">
+<div class="card">
+<h3>內容審核</h3>
+<p>在AI生成內容上線前審核並批准</p>
+</div>
+<div class="card">
+<h3>對話邊界</h3>
+<p>設定AI可討論的話題範圍</p>
+</div>
+<div class="card">
+<h3>真人接管</h3>
+<p>隨時跳入接管您的AI控制</p>
+</div>
+<div class="card">
+<h3>營收上限</h3>
+<p>設定AI每次互動的收費限制</p>
+</div>
+<div class="card">
+<h3>隱私保護</h3>
+<p>您的個人資料保持私密和安全</p>
+</div>
+<div class="card">
+<h3>活動監控</h3>
+<p>即時查看您的AI所做的一切</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 9: 8種變現 -->
+<section class="slide">
+<div class="content">
+<div class="two monetization-layout tc-monetization-layout">
+<div class="monetization-copy">
+<div class="kicker">變現模式</div>
+<h2>用您的AI分身<br/><span class="yellow">8種方式</span>變現</h2>
+</div>
+<div class="monetization-grid">
+<div class="card">
+<h3>訂閱收入</h3>
+<p>粉絲每月付費訂閱</p>
+</div>
+<div class="card">
+<h3>打賞收益</h3>
+<p>直播和聊天中的打賞</p>
+</div>
+<div class="card">
+<h3>付費內容</h3>
+<p>獨家照片、影片和內容銷售</p>
+</div>
+<div class="card">
+<h3>AI直播</h3>
+<p>24 / 7 AI直播自動營收</p>
+</div>
+<div class="card">
+<h3>虛擬禮物</h3>
+<p>粉絲互動中的禮物收入</p>
+</div>
+<div class="card">
+<h3>商品推廣</h3>
+<p>AI自動推廣您的產品</p>
+</div>
+<div class="card">
+<h3>品牌合作</h3>
+<p>與品牌商合作推廣營收</p>
+</div>
+<div class="card">
+<h3>專屬服務</h3>
+<p>提供VIP專屬互動服務</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 10: 收入增長 -->
+<section class="slide">
+<div class="content">
+<div class="two growth-layout">
+<div>
+<div class="kicker">收入潛力</div>
+<h2>倍增您的<br/><span class="yellow">收入</span></h2>
+<p class="growth-copy-text">
+您的AI分身全天候互動、持續變現，讓粉絲經營與收入增長自動運轉，您安心享受更多自由。
+</p>
+</div>
+<div>
+<div class="compare">
+<div class="panel" style="background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 12px 40px rgba(0,0,0,.45);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+<h3 style="color:#999;font-size:clamp(32px,3.8vw,48px);margin-bottom:clamp(24px,3vh,36px);line-height:1;white-space:nowrap">沒有AI</h3>
+<p class="small" style="font-size:clamp(17px,1.9vw,22px);line-height:1.65;max-width:320px">受限於您的工作時間和精力</p>
+</div>
+<div class="panel" style="background:linear-gradient(135deg,rgba(255,198,26,.14),rgba(255,198,26,.05));border:1px solid rgba(255,198,26,.45);box-shadow:0 1px 0 rgba(255,198,26,.15) inset,0 12px 40px rgba(0,0,0,.45),0 0 0 1px rgba(255,198,26,.12),0 8px 32px rgba(255,198,26,.15);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+<h3 style="color:var(--yellow);font-size:clamp(32px,3.8vw,48px);margin-bottom:clamp(24px,3vh,36px);text-shadow:0 0 20px rgba(255,198,26,.3);line-height:1;white-space:nowrap">有AI</h3>
+<p class="small" style="color:var(--gray);font-size:clamp(17px,1.9vw,22px);line-height:1.65;max-width:320px">跨所有時區全天候賺錢</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 11: 創作者後台 -->
+<section class="slide">
+<div class="content">
+<div class="two dashboard-layout tc-dashboard-layout">
+<div class="dashboard-copy">
+<div class="kicker">創作者控制中心</div>
+<h2><span class="yellow">統一管理</span><br/>輕鬆變現</h2>
+</div>
+<div class="dashboard-grid">
+<div class="card enhanced">
+<h3>AI分身工作室</h3>
+<p>訓練和設定AI個性</p>
+</div>
+<div class="card enhanced">
+<h3>直播控制</h3>
+<p style="white-space:nowrap">啟動AI直播或親自上線</p>
+</div>
+<div class="card enhanced">
+<h3>對話監控</h3>
+<p>即時查看AI互動內容</p>
+</div>
+<div class="card enhanced">
+<h3>內容資產庫</h3>
+<p>管理貼文、照片、影片和AI素材</p>
+</div>
+<div class="card enhanced">
+<h3>營收儀表板</h3>
+<p style="white-space:nowrap">追蹤收入、訂閱與打賞</p>
+</div>
+<div class="card enhanced">
+<h3>粉絲分析</h3>
+<p>了解受眾並優化增長</p>
+</div>
+<div class="card enhanced">
+<h3>錢包</h3>
+<p>安全提現與管理營收</p>
+</div>
+<div class="card enhanced">
+<h3>設定</h3>
+<p>配置AI行為和規則</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 12: vs 普通AI -->
+<section class="slide">
+<div class="content">
+<div class="two late-layout">
+<div class="late-copy">
+<div class="kicker">為何選擇 iFANZY</div>
+<h2>授權AI分身<br/><span class="yellow">vs</span><br/>普通AI</h2>
+</div>
+<div class="late-grid two-col comparison-grid">
+<div class="late-card">
+<h3 style="color:#999">普通AI機器人</h3>
+<div class="list">
+<div class="item"><span class="mark">✗</span> 千篇一律的回應</div>
+<div class="item"><span class="mark">✗</span> 毫無個性</div>
+<div class="item"><span class="mark">✗</span> 無法變現</div>
+<div class="item"><span class="mark">✗</span> 不支援直播</div>
+<div class="item"><span class="mark">✗</span> 未經授權</div>
+</div>
+</div>
+<div class="late-card" style="border-color:rgba(255,198,26,.4);background:linear-gradient(135deg,rgba(255,198,26,.12),rgba(255,198,26,.04))">
+<h3 style="color:var(--yellow)">您的專屬AI分身</h3>
+<div class="list">
+<div class="item"><span class="mark">✓</span> 完全複製您的說話方式</div>
+<div class="item"><span class="mark">✓</span> 您的獨特個性與風格</div>
+<div class="item"><span class="mark">✓</span> 全天候自動變現</div>
+<div class="item"><span class="mark">✓</span> 內建AI直播功能</div>
+<div class="item"><span class="mark">✓</span> 創作者本人授權認證</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 13: 早期優勢 -->
+<section class="slide">
+<div class="content">
+<div class="two late-layout">
+<div class="late-copy">
+<div class="kicker">早期優勢</div>
+<h2>加入<br/><span class="yellow">AI創作者時代</span></h2>
+<p class="tagline">
+最早採用AI的創作者將主導下一個十年
+</p>
+</div>
+<div class="late-grid one-col">
+<div class="late-card">
+<h3>先行者優勢</h3>
+<p>當您的競爭對手還在睡覺時，成為首批擁有AI分身的創作者</p>
+</div>
+<div class="late-card">
+<h3>平台成長</h3>
+<p>隨著iFanzy成為未來的AI創作者平台一起成長</p>
+</div>
+<div class="late-card">
+<h3>競爭護城河</h3>
+<p>建立其他人無法複製的AI驅動粉絲忠誠度</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 12: 全球 AI 團隊 -->
+<section class="slide">
+<div class="content">
+<div class="tech-layout">
+<div class="tech-copy">
+<div class="kicker"><span>全球領先</span><span>AI 技術團隊</span></div>
+<h2>以<span class="yellow">自主技術</span><br/>驅動創新</h2>
+</div>
+<div class="tech-stack">
+<div>
+<h3 class="tech-section-title">全球 AI 團隊</h3>
+<div class="tech-grid">
+<div class="tech-tile">
+<div class="tech-icon">🇺🇸</div>
+<h4>矽谷</h4>
+<p>核心研發</p>
+</div>
+<div class="tech-tile">
+<div class="tech-icon">🇯🇵</div>
+<h4>日本</h4>
+<p>AI 直播創新</p>
+</div>
+<div class="tech-tile">
+<div class="tech-icon">🇸🇬</div>
+<h4>新加坡</h4>
+<p>產品與運營</p>
+</div>
+</div>
+</div>
+<div>
+<h3 class="tech-section-title">自主 AI 技術</h3>
+<div class="tech-grid">
+<div class="tech-tile highlight">
+<div class="tech-icon">🤖</div>
+<h4>AI 直播專用<br/>大型模型</h4>
+</div>
+<div class="tech-tile highlight">
+<div class="tech-icon">👤</div>
+<h4>數位分身<br/>技術</h4>
+</div>
+<div class="tech-tile highlight">
+<div class="tech-icon">⚖️</div>
+<h4>AI 直播平台<br/>知識產權</h4>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 13: 團隊經驗 -->
+<section class="slide">
+<div class="content">
+<div class="expertise-layout">
+<div class="expertise-copy">
+<div class="kicker">實戰經驗</div>
+<h2><span class="title-line">專業團隊具備</span><span class="title-line yellow">規模化 AI</span><span class="title-line yellow">實戰經驗</span></h2>
+</div>
+<div class="expertise-stack">
+<div class="expertise-stats">
+<div class="expertise-stat">
+<div class="expertise-number">3000萬</div>
+<p>團隊運營的 AI 陪伴產品擁有<br/>3000 萬月活用戶</p>
+</div>
+<div class="expertise-stat">
+<div class="expertise-number">$6000萬</div>
+<p>AI 消費產品月經常性收入<br/>超過 6000 萬美元</p>
+</div>
+</div>
+<div class="expertise-points">
+<div class="item"><span class="mark">✓</span> 多年 AI 互動與變現專業經驗</div>
+<div class="item"><span class="mark">✓</span> 將成熟 AI 經驗應用於創作者經濟</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Slide 17: CTA -->
+<section class="slide" id="contact">
+<div class="content">
+<div class="two cta-layout">
+<div class="cta-copy">
+<div class="kicker">加入AI創作者革命</div>
+<p>
+<span>不再為錯過互動而失眠</span>
+<span>讓您的AI分身持續陪伴每一位粉絲</span>
+<span>現在開始建立自動化收入引擎</span>
+</p>
+</div>
+<div class="cta-panel">
+<h2>準備好建立您的<br/><span class="yellow">AI帝國？</span></h2>
+<div class="cta-links">
+<a href="https://www.ifanzy.com">www.ifanzy.com</a>
+<div>business@ifanzy.com</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<script>
+// Language switcher - only save position, restoration happens in head
+document.addEventListener('DOMContentLoaded', function() {
+  // Save scroll position before navigation
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const currentScroll = window.pageYOffset || window.scrollY || 0;
+      const slideHeight = window.innerHeight;
+      const currentSlide = Math.round(currentScroll / slideHeight);
+
+      try {
+        sessionStorage.setItem('slidePosition', currentSlide);
+      } catch(err) {
+        console.log('Storage error:', err);
+      }
+      // Let default navigation happen
+    });
+  });
+});
+</script>
+
+</body>
+</html>
