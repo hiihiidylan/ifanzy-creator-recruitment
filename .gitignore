@@ -4,3 +4,6 @@ node_modules/
 tasks/
 .output
 package-lock.json
+tmp/
+outputs/pdf/*_preview*.pdf
+outputs/pdf/*_true_4x3*.pdf
